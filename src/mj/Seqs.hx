@@ -301,4 +301,61 @@ class Seqs {
         }
         printer.close();
     }
+
+    public inline function printOldTxt(printer:Printer):Void {
+        printer.printString("+");
+        for (e in ipos) printer.printString(" " + e);
+        printer.printString(printer.newline);
+        var c:Seq = first;
+        while(c != null) {
+            // output what this is
+            printer.printString("+NODE " + (c.id - 1) + " " + ((c.names == null) ? 0 : c.names.length));
+            printer.printString(printer.newline);
+            if(c.names != null && c.names.length > 0) {
+                for(name in c.names) {
+                    printer.printString("NAME ");
+                    printer.printString(name);
+                    printer.printString(printer.newline);
+                }
+            }
+            printer.printString("SEQ " + c.origSeq);
+            printer.printString(printer.newline);
+            c = c.next;
+        }
+        var c:Seq = first;
+        while(c != null) {
+            // connections
+            if(c.connectedTo != null && c.nrConnections > 0) {
+                var con:Connection = c.connectedTo;
+                while(con != null) {
+                    if(c.id < con.connectedTo.id) {
+                        var l:List<Int> = new List<Int>();
+                        for(pos in 0...c.origSeq.length) {
+                            if(c.origSeq.charAt(pos) != con.connectedTo.origSeq.charAt(pos)) {
+                                l.add(pos); //printer.printString(" " + (pos + printer.countingOffset));
+                            }
+                        }
+                        printer.printString("+CON " + (c.id-1) + " " + (con.connectedTo.id-1) + " " + con.dist + " " + l.length);
+                        printer.printString(printer.newline);
+                        printer.printString("POS");
+                        for(e in l) {
+                            printer.printString(" " + e);
+                        }
+                        printer.printString(printer.newline);
+                    }
+                    con = con.next;
+                }
+            }
+            // links
+            if(c.linkedTo != null && c.linkedTo.length > 0) {
+                for(link in c.linkedTo) {
+                    if(c.id-1 > link.to.id-1) {
+                        printer.printString("+LINK " + (c.id-1) + " " + (link.to.id-1) + " " + link.names.length + " " + link.names.length + " " + link.names.length);
+                        printer.printString(printer.newline);
+                    }
+                }
+            }
+            c = c.next;
+        }
+    }
 }
