@@ -4,6 +4,9 @@ package parsing;
  * This class contains static methods that are usefull for parsing.
  */
 class Parse {
+     public static inline function startsWith(t:String,s:String):Bool {
+         return t.substr(0, s.length) == s;
+     }
      public static inline function isWhitespace(s:String, pos:Int):Bool {
          var cCode:Int = s.charCodeAt(pos);
          var result:Bool = false;
