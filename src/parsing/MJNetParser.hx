@@ -51,7 +51,7 @@ class MJNetParser {
             if(indents == 2 && Parse.startsWith(line_, "ID")) {
                 currentNode.id = Std.parseInt(line_.split(" ")[1]);
             } else if(indents == 2 && Parse.startsWith(line_, "SPECIES_ID")) {
-                currentNode.id = Std.parseInt(line_.split(" ")[1]);
+                currentNode.spId = Std.parseInt(line_.split(" ")[1]);
             } else if(indents == 2 && Parse.startsWith(line_, "SEQUENCE")) {
                 currentNode.seq = line_.split(" ")[1];
             } else if(indents == 2 && Parse.startsWith(line_, "NB_NAMES")) { // do nothing
