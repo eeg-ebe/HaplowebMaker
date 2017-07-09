@@ -23,10 +23,12 @@ class Link {
     public var e2:Float;
 
     public inline function new(n1:NodePos,n2:NodePos,w:Float) {
-        this.dashedArray = new List<Float>();
         this.n1 = n1;
         this.n2 = n2;
         this.w = w;
+        this.strokeColor = "blue";
+        this.strokeWidth = w;
+        this.dashedArray = new List<Float>();
     }
 
     public inline function calcCurve(a:Float, b:Float, c:Float, t:Float):Float {

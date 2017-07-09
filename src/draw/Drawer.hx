@@ -12,5 +12,8 @@ class Drawer {
         var myArgs:Array<String> = Sys.args();
         var net:List<Node> = MJNetParser.parseNet(sys.io.File.getContent(myArgs[0]));
         var g:Graph = new Graph(net);
+        g.assignRandomNodePos();
+        g.assignLinkPos();
+        new StdOutPrinter().printString(g.getSvgCode());
     }
 }

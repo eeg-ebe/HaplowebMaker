@@ -12,13 +12,35 @@ class Connection {
     public var dashedArray:List<Float>;
 
     public var drawMutsByLine:Bool;
+    public var drawMutsLineStrokeColor:String;
+    public var drawMutsLineWidth:Float;
+    public var drawMutsLineLen:Float;
+    public var drawMutsLineDashedArray:List<Float>;
+
     public var drawMutsByText:Bool;
+    public var drawMutsTextFont:String;
+    public var drawMutsTextSize:Float;
+    public var drawMutsTextColor:String;
+    public var drawMutsTextPX:Float;
+    public var drawMutsTextPY:Float;
+
     public var drawMutsByDots:Bool;
+    public var drawMutsDotsSize:Float;
+    public var drawMutsDotsColor:String;
+    public var drawMutsDotsDashedArray:List<Float>;
 
     public inline function new(n1:NodePos,n2:NodePos,l:List<Int>) {
         this.n1 = n1;
         this.n2 = n2;
         this.l = l;
+        this.strokeColor = "grey";
+        this.strokeWidth = 3;
+        this.dashedArray = new List<Float>();
+        drawMutsByLine = false;
+        drawMutsByText = false;
+        drawMutsByDots = false;
+        this.drawMutsLineDashedArray = new List<Float>();
+        this.drawMutsDotsDashedArray = new List<Float>();
     }
 
     public inline function getNodeSvg():String {
@@ -36,41 +58,66 @@ class Connection {
             result.add("' ");
         }
         result.add("/>");
-        if(drawMutsByLine) {
-            
+        if(drawMutsByLine || drawMutsByText || drawMutsByDots) {
+            var vX:Float = n1.xPos - n2.xPos;
+            var vY:Float = n1.yPos - n2.yPos;
+            var vL:Float = Math.sqrt(vX * vX + vY * vY);
+            var eVX:Float = vX / vL;
+            var eVY:Float = vY / vL;
+            var startX:Float = n2.xPos + eVX * n2.radius;
+            var startY:Float = n2.yPos + eVY * n2.radius;
+            var endX:Float = n2.xPos + vX - eVX * n1.radius;
+            var endY:Float = n2.yPos + vY - eVY * n1.radius;
+            vX = (endX - startX) / (this.l.length + 1);
+            vY = (endY - startY) / (this.l.length + 1);
+            var iii:Int = 0;
+            for(text in this.l) {
+                iii++;
+                var x:Float = startX + vX * iii;
+                var y:Float = startY + vY * iii;
+                if(drawMutsByDots) {
+                    result.add("<circle cx='");
+                    result.add(x + "' cy='");
+                    result.add(y + "' r='");
+                    result.add(drawMutsDotsSize + " fill='");
+                    result.add(drawMutsDotsColor);
+                    if(!this.drawMutsDotsDashedArray.isEmpty()) {
+                        result.add(" stroke-dasharray='");
+                        result.add(this.drawMutsDotsDashedArray.join(","));
+                        result.add("'");
+                    }
+                    result.add("/>");
+                }
+                if(drawMutsByLine) {
+                    var x1:Float = x - eVY * drawMutsLineLen;
+                    var y1:Float = y + eVX * drawMutsLineLen;
+                    var x2:Float = x + eVY * drawMutsLineLen;
+                    var y2:Float = y - eVX * drawMutsLineLen;
+                    result.add("<line x1='");
+                    result.add(x1 + "' y1='");
+                    result.add(y1 + "' x2='");
+                    result.add(x2 + "' y2='");
+                    result.add(y2 + "' stroke='");
+                    result.add(drawMutsLineStrokeColor + "' stroke-width='");
+                    result.add(drawMutsLineWidth + "'");
+                    if(!this.drawMutsLineDashedArray.isEmpty()) {
+                        result.add(" stroke-dasharray='");
+                        result.add(this.drawMutsLineDashedArray.join(","));
+                        result.add("'");
+                    }
+                    result.add("/>");
+                }
+                if(drawMutsByText) {
+                    result.add("<text x='");
+                    result.add((x + drawMutsTextPX) + "' y='");
+                    result.add((y + drawMutsTextSize / 2 + drawMutsTextPY) + "' fill='");
+                    result.add(drawMutsTextColor + "' font-family='");
+                    result.add(drawMutsTextFont + "' font-size='");
+                    result.add(drawMutsTextSize + "'");
+                    result.add(">" + text + "</text>");
+                }
+            }
         }
-/*      if (drawMutsByLine || drawMutsByText || drawMutsByDots) { // TODO
-        var mutations = new Array();
-        for(var i = 0; i < network["nodes"][fr]["seq"].length; i++) {
-          if (network["nodes"][fr]["seq"][i] != network["nodes"][to]["seq"][i]) {
-            mutations.push(i + 1);
-          }
-        }
-        var vect = new Array(x1-x2, y1-y2);
-        var vectLength = Math.sqrt(vect[0] * vect[0] + vect[1] * vect[1]);
-        var eVect = new Array(vect[0] / vectLength, vect[1] / vectLength);
-        var startingPosX = x2 + eVect[0] * network["nodes"][to]["drawSize"], startingPosY = y2 + eVect[1] * network["nodes"][to]["drawSize"];
-        var endingPosX = x2 + vect[0] - eVect[0] * network["nodes"][fr]["drawSize"], endingPosY = y2 + vect[1] - eVect[1] * network["nodes"][fr]["drawSize"];
-        vect = new Array((endingPosX-startingPosX) / (mutations.length + 1), (endingPosY-startingPosY) / (mutations.length + 1));
-        for (var iii = 1; iii <= mutations.length; iii++) {
-          var x = startingPosX + vect[0] * iii, y = startingPosY + vect[1] * iii;
-          if (drawMutsByDots) {
-            newHtml += "<circle cx='" + x + "' cy='" + y + "' r='" + $( "#spinner4" ).spinner( "value" ) + "' fill='" + document.getElementById('myColor4').value + "' />";
-          }
-          if (drawMutsByLine) {
-            var l = $( "#spinner2" ).spinner( "value" );
-            x1 = x - eVect[1] * l;
-            y1 = y + eVect[0] * l;
-            x2 = x + eVect[1] * l;
-            y2 = y - eVect[0] * l;
-            newHtml += "<line x1='" + x1 + "' y1='" + y1 + "' x2='" + x2 + "' y2='" + y2 + "' stroke='" + document.getElementById('myColor3').value + "' stroke-width='" + $( "#spinner3" ).spinner( "value" ) + "' />";
-          }
-          if (drawMutsByText) {
-            var text = mutations[iii-1];
-            newHtml += "<text x='" + (x) + "' y='" + (y + textfontsize / 2) + "' fill='" + textfontcolor + "'>" + text + "</text>";
-          }
-        }
-*/
         return result.join("");
     }
 }

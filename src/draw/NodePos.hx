@@ -18,8 +18,16 @@ class NodePos {
 
     public inline function new(n:Node) {
         pie = new List<Pair<String,Int>>();
-        dashedArray = new List<Float>();
         this.node = n;
+        this.radius = 3 + node.names.length;
+        if(this.node.type == MEDIAN_VECTOR) {
+            this.strokeColor = "grey";
+            this.strokeWidth = 1;
+        } else {
+            this.strokeColor = "black";
+            this.strokeWidth = 3;
+        }
+        dashedArray = new List<Float>();
     }
 
     public inline function getNodeSvg():String {

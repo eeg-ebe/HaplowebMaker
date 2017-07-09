@@ -40,6 +40,47 @@ class Graph {
         }
     }
 
+    public inline function getSvgCode():String {
+        // calculate view box
+        var maxX:Float = Math.NEGATIVE_INFINITY;
+        var maxY:Float = Math.NEGATIVE_INFINITY;
+        var minX:Float = Math.POSITIVE_INFINITY;
+        var minY:Float = Math.POSITIVE_INFINITY;
+        for(node in nodes) {
+            maxX = Math.max(maxX, node.maxX());
+            maxY = Math.max(maxY, node.maxY());
+            minX = Math.min(minX, node.minX());
+            minY = Math.min(minY, node.minY());
+        }
+        for(link in links) {
+            var x:Float = link.getMMX(); var y:Float = link.getMMY();
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+        }
+        var width:Float = maxX - minX + 30;
+        var height:Float = maxY - minY + 30;
+        // draw
+        var result:List<String> = new List<String>();
+        result.add("<svg version='1.1' baseProfile='full' width='" + width);
+        result.add("' height='" + height);
+        result.add("' viewBox='" + (minX - 15) + "," + (minY - 15) + "," + width + "," + height + "' xmlns='http://www.w3.org/2000/svg'>");
+        for(con in cons) {
+            result.add(con.getNodeSvg());
+        }
+        result.add("<g fill='none'>");
+        for(link in links) {
+            result.add(link.getLinkSvg());
+        }
+        result.add("</g>");
+        for(node in nodes) {
+            result.add(node.getNodeSvg());
+        }
+        result.add("</svg>");
+        return result.join("");
+    }
+
     public inline function dist(x1:Float,y1:Float,x2:Float,y2:Float):Float {
         var dX:Float = x1 - x2;
         var dY:Float = y1 - y2;
