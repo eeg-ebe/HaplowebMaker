@@ -13,7 +13,7 @@ class NodePos {
     public var pie:List<Pair<String,Int>>;
 
     public var strokeColor:String;
-    public var strokeWidth:Int;
+    public var strokeWidth:Float;
     public var dashedArray:List<Float>;
 
     public inline function new(n:Node) {
@@ -81,7 +81,7 @@ class NodePos {
                 var pX2:Float = Math.sin(cs / summe * 2 * Math.PI) * this.radius + this.xPos;
                 var pY2:Float = -Math.cos(cs / summe * 2 * Math.PI) * this.radius + this.xPos;
                 var arcFlag:Int = (perc < 0.5) ? 0 : 1;
-                result.add("<path fill='" + color + "' d='M" + this.xPos + "," + this.yPos + " L" + pX1 + "," + pY1 + " A" + this.radius + "," + this.radius + " 1 " + arcFlag + ",1 " + pX2 + ", " + pY2 + " z' stroke-width='1' />");
+                result.add("<path fill='" + color + "' d='M" + this.xPos + "," + this.yPos + " L" + pX1 + "," + pY1 + " A" + this.radius + "," + this.radius + " 1 " + arcFlag + ",1 " + pX2 + ", " + pY2 + " z'/>");
             }
         }
         // result
@@ -101,5 +101,4 @@ class NodePos {
         return yPos + radius;
     }
 
-public static inline function main():Void {}
 }
