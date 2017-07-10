@@ -14,6 +14,7 @@ class Drawer {
         var g:Graph = new Graph(net);
         g.assignRandomNodePos();
         g.assignLinkPos();
+        g.slsSearch();
         new StdOutPrinter().printString(g.getSvgCode());
     }
 }
