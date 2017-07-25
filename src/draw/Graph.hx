@@ -143,6 +143,12 @@ class Graph {
         }
     }
 
+// TODO:
+//   - force directed method
+//   - approx
+//   - pca
+//   - dot output and graphviz txt output parsing
+
     public inline function slsSearch():Void {
 for(i in 0...1) sls1Step();
 //        while(sls1Step()) {}

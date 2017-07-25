@@ -45,4 +45,5 @@ class FastaParser {
         }
         return faSeqs;
     }
+    public static function main():Void {}
 }

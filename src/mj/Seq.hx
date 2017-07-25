@@ -50,7 +50,7 @@ class Seq {
         if(s != null) {
             var pos:Int = s.lastIndexOf("_");
             if(pos != -1) {
-                result = s.substr(0, pos+1);
+                result = s.substr(0, pos);
             }
         }
         return result;

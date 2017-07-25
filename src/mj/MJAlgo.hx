@@ -17,9 +17,14 @@ class MJAlgo {
 
     private var rdeltas:List<List<Delta>>;
 
+    private var seqCount:Int;
+    private var nextSpId:Int;
+
     public inline function new() {
         seqs = new Seqs();
         rdeltas = new List<List<Delta>>();
+        seqCount = 0;
+        nextSpId = 0;
     }
 
     public inline function distStr(s1:String,s2:String):Float {
@@ -37,6 +42,7 @@ class MJAlgo {
 
     public inline function addSequence(name:String,seq:String):Void {
         seqs.addSample(name, seq);
+        seqCount++;
     }
 
     public inline function finishedAddingSequences():Void {
@@ -489,11 +495,12 @@ class MJAlgo {
             current = current.next;
         }
         // assign species ids
-        var nextSpId:Int = 1;
         var l:List<Seq> = new List<Seq>();
         current = seqs.first;
         while(current != null && current.isSample) {
             if(current.spId == 0) {
+                // set next sp. id.
+                nextSpId++;
                 current.spId = nextSpId;
                 // set all species connected by link the species id.
                 l.clear();
@@ -510,8 +517,6 @@ class MJAlgo {
                         }
                     }
                 }
-                // set next sp. id.
-                nextSpId++;
             }
             current = current.next;
         }
@@ -522,6 +527,22 @@ class MJAlgo {
         trace("Time usage of finalization:",(Sys.time() - timestamp));
         #end
         return this.seqs;
+    }
+
+    public inline function getNrSeqs():Int {
+        return seqCount;
+    }
+    public inline function getNrDifSeqs():Int {
+        return this.seqs.size;
+    }
+    public inline function getSeqLength():Int {
+        return this.seqs.origSeqLen;
+    }
+    public inline function getNrInterestingPositions():List<Int> {
+        return this.seqs.ipos;
+    }
+    public inline function getNrFFRs():Int {
+        return this.nextSpId;
     }
 
     public static function main():Void {

@@ -1,3 +1,6 @@
+# damn nano save
+*.swp
+
 # Compiled Object files
 *.slo
 *.lo
