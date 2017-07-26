@@ -16,6 +16,11 @@ class NodePos {
     public var strokeWidth:Float;
     public var dashedArray:List<Float>;
 
+    public var velocityX:Float;
+    public var velocityY:Float;
+    public var forceX:Float;
+    public var forceY:Float;
+
     public inline function new(n:Node) {
         pie = new List<Pair<String,Int>>();
         this.node = n;

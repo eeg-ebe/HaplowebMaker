@@ -6,6 +6,7 @@ class Connection {
     public var n1:NodePos;
     public var n2:NodePos;
     public var l:List<Int>;
+    public var expLength:Float;
 
     public var strokeColor:String;
     public var strokeWidth:Float;
@@ -33,6 +34,7 @@ class Connection {
         this.n1 = n1;
         this.n2 = n2;
         this.l = l;
+        this.expLength = this.n1.radius + this.n2.radius + this.l.length * 100;
         this.strokeColor = "grey";
         this.strokeWidth = 3;
         this.dashedArray = new List<Float>();
