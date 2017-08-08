@@ -81,7 +81,7 @@ class Graph {
         return result.join("");
     }
 
-    public inline function dist(x1:Float,y1:Float,x2:Float,y2:Float):Float {
+    public static inline function dist(x1:Float,y1:Float,x2:Float,y2:Float):Float {
         var dX:Float = x1 - x2;
         var dY:Float = y1 - y2;
         return Math.sqrt(dX*dX + dY*dY);
@@ -97,8 +97,8 @@ class Graph {
             // calculate the two positions
             var vX:Float = link.n1.xPos - link.n2.xPos;
             var vY:Float = link.n1.yPos - link.n2.yPos;
-            var vrX:Float = -vY / 4;
-            var vrY:Float = vX / 4;
+            var vrX:Float = -vY / 8;
+            var vrY:Float = vX / 8;
             var mX:Float = link.n2.xPos + vX / 2;
             var mY:Float = link.n2.yPos + vY / 2;
             link.x1 = mX - vrX;
@@ -141,6 +141,105 @@ class Graph {
             node.xPos = ((Math.random() > 0.5) ? -1 : 1) * 1000 * Math.random();
             node.yPos = ((Math.random() > 0.5) ? -1 : 1) * 1000 * Math.random();
         }
+        checkNoNodeAtSamePoint();
+    }
+
+    public inline function checkNoNodeAtSamePoint():Void {
+        for(node1 in nodes) {
+            var needCheck:Bool = true;
+            while(needCheck) {
+                needCheck = false;
+                for(node2 in nodes) {
+                    if(node1.node.id > node2.node.id && node1.xPos == node2.xPos && node2.yPos == node2.yPos) {
+                        node1.xPos = ((Math.random() > 0.5) ? -1 : 1) * 1000 * Math.random();
+                        node1.yPos = ((Math.random() > 0.5) ? -1 : 1) * 1000 * Math.random();
+                        needCheck = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public inline function forceDirectedMethod(setRandomInitial:Bool, damping:Float, smE:Float):Void {
+        // parameters
+        var kn:Float = 1.0;
+        var ks:Float = 1.0;
+        var kc:Float = 1.0;
+        // set random initial if needed
+        if(setRandomInitial) {
+            assignRandomNodePos();
+        } else {
+            checkNoNodeAtSamePoint();
+        }
+        // set the initial node velocity
+        for(node in nodes) {
+            node.velocityX = 0;
+            node.velocityY = 0;
+        }
+        // some main loop parameters
+        var tE:Float = 0;
+        var xDif:Float;
+        var yDif:Float;
+        var r:Float;
+var step:Int = 0;
+        // the main loop
+        do {
+step++;
+            tE = 0;
+            for(node in nodes) {
+                // reset old force value
+                node.forceX = 0;
+                node.forceY = 0;
+                // calculate the effect of the coulomb repulsion on the node
+                for(oNode in nodes) {
+                    if(node != oNode) {
+                        //F=k_e*q_1*q_2/r**2
+                        xDif = node.xPos - oNode.xPos;
+                        yDif = node.yPos - oNode.yPos;
+                        r = Math.sqrt(xDif * xDif + yDif * yDif) + 0.01; // 0.01 is to prevent division by 0 at small r distances
+                        node.forceX += kn * xDif / (r * r);
+                        node.forceY += kn * yDif / (r * r);
+                    }
+                }
+                // calculate the effect of the spring attraction on the node
+                for(con in cons) {
+                    //F=k*X (k=constant; here 1, X=displacement)
+                    if(con.n1 == node) {
+                        xDif = con.n2.xPos - con.n1.xPos;
+                        yDif = con.n2.yPos - con.n1.yPos;
+                    } else if(con.n2 == node) {
+                        xDif = con.n1.xPos - con.n2.xPos;
+                        yDif = con.n1.yPos - con.n2.yPos;
+                    } else {
+                        continue;
+                    } // now xDif, yDif represent a vector to brings node towards it's connected node
+                    r = Math.sqrt(xDif * xDif + yDif * yDif);   // length of the vector (or how much the two nodes are away from each other)
+                    var displacement:Float = r - con.expLength; // ok, the displacement (positive if node should get moved towards other node else negative)
+                    // ok, calculate the vector towards spring the normalised point
+                    xDif = xDif / r; // normalization
+                    yDif = yDif / r;
+                    node.forceX -= ks * displacement * xDif;
+                    node.forceY -= ks * displacement * yDif;
+                }
+                // calculate the influence of the center
+/*
+                var centerX:Float = 0;
+                var centerY:Float = 0;
+                var nodeCounter:Float = 0;
+                for
+*/
+            }
+            // apply the force
+            for(node in nodes) {
+                node.velocityX = (node.velocityX + node.forceX) * damping;
+                node.velocityY = (node.velocityY + node.forceY) * damping;
+                node.xPos += node.velocityX;
+                node.yPos += node.velocityY;
+                var l:Float = Math.sqrt(node.velocityX * node.velocityX + node.velocityY * node.velocityY);
+                tE += l * l; // all nodes have mass 1
+            }
+        } while(tE > smE && step < 0);
     }
 
 // TODO:
@@ -199,7 +298,7 @@ for(i in 0...1) sls1Step();
         }
         // energy of connections
         for(con in cons) {
-            var expDist:Float = con.n1.radius + con.n2.radius + con.l.length * 100;
+            var expDist:Float = con.expLength;
             var rDist:Float = dist(con.n1.xPos, con.n1.yPos, con.n2.xPos, con.n2.yPos);
             var diff:Float = expDist - rDist;
             result += diff * diff;
