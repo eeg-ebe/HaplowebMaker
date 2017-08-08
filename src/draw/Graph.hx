@@ -77,6 +77,8 @@ class Graph {
         for(node in nodes) {
             result.add(node.getNodeSvg());
         }
+result.add("<text x='" + minX + "' y='" + minY + "'>" + calculateEnergy() + "</text>");
+result.add("<circle cx='" + calcCenterX() + "' cy='" + calcCenterY() + "' r='5' fill='green' />");
         result.add("</svg>");
         return result.join("");
     }
@@ -123,7 +125,7 @@ class Graph {
             for(link in l) {
                 // calculate energy difference
                 var eDiff:Float = Math.abs(link.e1 - link.e2);
-                if(eDiff > bestEDiff) {
+                if(eDiff > bestEDiff || bestEDiff == -1) {
                     bestEDiff = eDiff;
                     bestLink = link;
                 }
@@ -161,11 +163,47 @@ class Graph {
         }
     }
 
-    public inline function forceDirectedMethod(setRandomInitial:Bool, damping:Float, smE:Float):Void {
-        // parameters
-        var kn:Float = 1.0;
-        var ks:Float = 1.0;
-        var kc:Float = 1.0;
+    public inline function calcCenterX():Float {
+        var rx:Float = 0;
+        for(node in nodes) {
+            rx += node.xPos;
+        }
+        return rx / nodes.length;
+    }
+    public inline function calcCenterY():Float {
+        var ry:Float = 0;
+        for(node in nodes) {
+            ry += node.yPos;
+        }
+        return ry / nodes.length;
+    }
+    public inline function centerPos():Void {
+        var cx:Float = calcCenterX();
+        var cy:Float = calcCenterY();
+        for(node in nodes) {
+            node.xPos -= cx;
+            node.yPos -= cy;
+        }
+    }
+    public inline function stretch(fact:Float):Void {
+        var cx:Float = calcCenterX();
+        var cy:Float = calcCenterY();
+        for(node in nodes) {
+            // TODO
+        }
+    }
+    public inline function rotate(angle:Float):Void {
+        // TODO
+    }
+    public inline function approxAlgo():Void {
+        // TODO
+    }
+
+    public inline function fluct():Float {
+        return 10 * Math.random() * ((Math.random() > 0.5) ? 1 : -1);
+    }
+
+    public inline function forceDirectedMethod(setRandomInitial:Bool, damping:Float, smE:Float, ?kn:Float=1.0, ?ks:Float=0.2, ?kc:Float=5.0, ?steps:Int=1000):Void {
         // set random initial if needed
         if(setRandomInitial) {
             assignRandomNodePos();
@@ -182,10 +220,12 @@ class Graph {
         var xDif:Float;
         var yDif:Float;
         var r:Float;
-var step:Int = 0;
+        var stepCount:Int = 0;
+        var stopCritSteps:Bool;
         // the main loop
         do {
-step++;
+            stepCount++;
+            stopCritSteps = false;
             tE = 0;
             for(node in nodes) {
                 // reset old force value
@@ -197,9 +237,15 @@ step++;
                         //F=k_e*q_1*q_2/r**2
                         xDif = node.xPos - oNode.xPos;
                         yDif = node.yPos - oNode.yPos;
-                        r = Math.sqrt(xDif * xDif + yDif * yDif) + 0.01; // 0.01 is to prevent division by 0 at small r distances
-                        node.forceX += kn * xDif / (r * r);
-                        node.forceY += kn * yDif / (r * r);
+                        r = Math.sqrt(xDif * xDif + yDif * yDif);
+                        if(r > 1) { // prevent division by 0 at small r distances
+                            node.forceX += kn * xDif / (r * r);
+                            node.forceY += kn * yDif / (r * r);
+                        } else {
+                            r += 0.1; // prevent division by 0
+                            node.forceX += kn * (xDif + fluct()) / (r * r); // at that distance xDif, yDif is not reliable
+                            node.forceY += kn * (yDif + fluct()) / (r * r); // better add some fluctuations
+                        }
                     }
                 }
                 // calculate the effect of the spring attraction on the node
@@ -219,10 +265,13 @@ step++;
                     // ok, calculate the vector towards spring the normalised point
                     xDif = xDif / r; // normalization
                     yDif = yDif / r;
-                    node.forceX -= ks * displacement * xDif;
-                    node.forceY -= ks * displacement * yDif;
+                    node.forceX += ks * displacement * xDif;
+                    node.forceY += ks * displacement * yDif;
                 }
                 // calculate the influence of the center
+                // the center is defined by the position of all nodes "belonging" to the same FFR
+                // like this all nodes belonging to the same FFR tend to be in the same position
+                // TODO (test if this approach increase plotting quality)
 /*
                 var centerX:Float = 0;
                 var centerY:Float = 0;
@@ -239,13 +288,17 @@ step++;
                 var l:Float = Math.sqrt(node.velocityX * node.velocityX + node.velocityY * node.velocityY);
                 tE += l * l; // all nodes have mass 1
             }
-        } while(tE > smE && step < 0);
+            if(stepCount > steps && steps > -1) {
+                stopCritSteps = true;
+            }
+        } while(tE > smE && !stopCritSteps);
     }
 
 // TODO:
 //   - force directed method
 //   - approx
 //   - pca
+//   - center + rotate + stretch
 //   - dot output and graphviz txt output parsing
 
     public inline function slsSearch():Void {
