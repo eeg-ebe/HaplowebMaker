@@ -189,11 +189,33 @@ result.add("<circle cx='" + calcCenterX() + "' cy='" + calcCenterY() + "' r='5' 
         var cx:Float = calcCenterX();
         var cy:Float = calcCenterY();
         for(node in nodes) {
-            // TODO
+            // vect v from center to point
+            var vX:Float = node.xPos - cx;
+            var vY:Float = node.yPos - cy;
+            // stretch vector by fact
+            vX *= fact;
+            vY *= fact;
+            // assign new pos
+            node.xPos = cx + vX;
+            node.yPos = cy + vY;
         }
     }
     public inline function rotate(angle:Float):Void {
-        // TODO
+        centerPos();
+        var cx:Float = calcCenterX();
+        var cy:Float = calcCenterY();
+        for(node in nodes) {
+            // vect v from center to point
+            var vX:Float = node.xPos - cx;
+            var vY:Float = node.yPos - cy;
+            // stretch vector by fact
+            vX = vX * Math.cos(angle) - vY * Math.sin(angle);
+            vY = vX * Math.sin(angle) + vY * Math.cos(angle);
+            // assign new pos
+            node.xPos = cx + vX;
+            node.yPos = cy + vY;
+        }
+        centerPos();
     }
     public inline function approxAlgo():Void {
         // TODO
@@ -300,7 +322,7 @@ result.add("<circle cx='" + calcCenterX() + "' cy='" + calcCenterY() + "' r='5' 
 //   - pca
 //   - center + rotate + stretch
 //   - dot output and graphviz txt output parsing
-
+//   - save/parsing
     public inline function slsSearch():Void {
 for(i in 0...1) sls1Step();
 //        while(sls1Step()) {}

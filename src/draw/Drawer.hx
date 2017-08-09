@@ -14,6 +14,10 @@ class Drawer {
         var g:Graph = new Graph(net);
         g.forceDirectedMethod(true, 0.6, 0.5, 500.0, 0.1, 0.1, 10000);
         g.centerPos();
+        g.stretch(0.01);
+        g.assignLinkPos();
+        new StdOutPrinter().printString(g.getSvgCode());
+        g.rotate(0.1);
         g.assignLinkPos();
         new StdOutPrinter().printString(g.getSvgCode());
     }
