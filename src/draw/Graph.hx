@@ -40,6 +40,134 @@ class Graph {
         }
     }
 
+    private inline function pieToTxt(pie:List<Pair<String,Int>>):String {
+        var result:List<String> = new List<String>();
+        for(p in pie) {
+            result.add(p.first + "\x01" + p.second);
+        }
+        return result.join("\x03");
+    }
+    public inline function saveStyle():String {
+        var result:List<String> = new List<String>();
+        // all nodes
+        for(node in nodes) {
+            var n:List<String> = new List<String>();
+            // save node attributes
+            n.add("" + node.xPos);
+            n.add("" + node.yPos);
+            n.add("" + node.radius);
+            n.add(pieToTxt(node.pie));
+            n.add(node.strokeColor);
+            n.add("" + node.strokeWidth);
+            n.add(node.dashedArray.join("|"));
+            // now add to list
+            result.add(n.join("\x02"));
+        }
+        // all connections
+        for(con in cons) {
+            var n:List<String> = new List<String>();
+            // save connections attributes
+            n.add(con.strokeColor);
+            n.add("" + con.strokeWidth);
+            n.add(con.dashedArray.join("|"));
+            n.add((con.drawMutsByLine) ? "1" : "0");
+            n.add(con.drawMutsLineStrokeColor);
+            n.add("" + con.drawMutsLineWidth);
+            n.add("" + con.drawMutsLineLen);
+            n.add("" + con.drawMutsLineDashedArray.join("|"));
+            n.add((con.drawMutsByText) ? "1" : "0");
+            n.add(con.drawMutsTextFont);
+            n.add("" + con.drawMutsTextSize);
+            n.add(con.drawMutsTextColor);
+            n.add("" + con.drawMutsTextPX);
+            n.add("" + con.drawMutsTextPY);
+            n.add((con.drawMutsByDots) ? "1" : "0");
+            n.add("" + con.drawMutsDotsSize);
+            n.add(con.drawMutsDotsColor);
+            n.add(con.drawMutsDotsDashedArray.join("|"));
+            // now add to list
+            result.add(n.join("\x02"));
+        }
+        // all links
+        for(link in links) {
+            var n:List<String> = new List<String>();
+            // save link attributes
+            n.add("" + link.w);
+            n.add(link.strokeColor);
+            n.add("" + link.strokeWidth);
+            n.add(link.dashedArray.join("|"));
+            n.add("" + link.xPos);
+            n.add("" + link.yPos);
+            // now add to list
+            result.add(n.join("\x02"));
+        }
+        return result.join("\n");
+    }
+    public inline function parsePie(s:String):List<Pair<String,Int>> {
+return null; // TODO
+    }
+    public inline function loadStyle(style:String):Void {
+        var lines:Array<String> = style.split("\n");
+        // restore node style
+        for(node in nodes) {
+            var attrs:Array<String> = lines.pop().split("\x02");
+            node.xPos = Std.parseFloat(attrs.pop());
+            node.yPos = Std.parseFloat(attrs.pop());
+            node.radius = Std.parseFloat(attrs.pop());
+            node.pie = parsePie(attrs.pop());
+            node.strokeColor = attrs.pop();
+            node.strokeWidth = Std.parseFloat(attrs.pop());
+            node.dashedArray = new List<Float>();
+            for(f in attrs.pop().split("|")) {
+                node.dashedArray.add(Std.parseFloat(f));
+            }
+        }
+        // restore connections
+        for(con in cons) {
+            var attrs:Array<String> = lines.pop().split("\x02");
+            con.strokeColor = attrs.pop();
+            con.strokeWidth = Std.parseFloat(attrs.pop());
+            con.dashedArray = new List<Float>();
+            for(f in attrs.pop().split("|")) {
+                con.dashedArray.add(Std.parseFloat(f));
+            }
+            con.drawMutsByLine = (attrs.pop() == "1");
+            con.drawMutsLineStrokeColor = attrs.pop();
+            con.drawMutsLineWidth = Std.parseFloat(attrs.pop());
+            con.drawMutsLineLen = Std.parseFloat(attrs.pop());
+            con.drawMutsLineDashedArray = new List<Float>();
+            for(f in attrs.pop().split("|")) {
+                con.drawMutsLineDashedArray.add(Std.parseFloat(f));
+            }
+            con.drawMutsByText = (attrs.pop() == "1");
+            con.drawMutsTextFont = attrs.pop();
+            con.drawMutsTextSize = Std.parseFloat(attrs.pop());
+            con.drawMutsTextColor = attrs.pop();
+            con.drawMutsTextPX = Std.parseFloat(attrs.pop());
+            con.drawMutsTextPY = Std.parseFloat(attrs.pop());
+            con.drawMutsByDots = (attrs.pop() == "1");
+            con.drawMutsDotsSize = Std.parseFloat(attrs.pop());
+            con.drawMutsDotsColor = attrs.pop();
+            con.drawMutsDotsDashedArray = new List<Float>();
+            for(f in attrs.pop().split("|")) {
+                con.drawMutsDotsDashedArray.add(Std.parseFloat(f));
+            }
+        }
+        // restore links
+        for(link in links) {
+            var attrs:Array<String> = lines.pop().split("\x02");
+            link.w = Std.parseFloat(attrs.pop());
+            link.strokeColor = attrs.pop();
+            link.strokeWidth = Std.parseFloat(attrs.pop());
+            link.dashedArray = new List<Float>();
+            for(f in attrs.pop().split("|")) {
+                link.dashedArray.add(Std.parseFloat(f));
+            }
+            link.xPos = Std.parseFloat(attrs.pop());
+            link.yPos = Std.parseFloat(attrs.pop());
+        }
+    }
+
     public inline function getSvgCode():String {
         // calculate view box
         var maxX:Float = Math.NEGATIVE_INFINITY;
@@ -77,8 +205,8 @@ class Graph {
         for(node in nodes) {
             result.add(node.getNodeSvg());
         }
-result.add("<text x='" + minX + "' y='" + minY + "'>" + calculateEnergy() + "</text>");
-result.add("<circle cx='" + calcCenterX() + "' cy='" + calcCenterY() + "' r='5' fill='green' />");
+//result.add("<text x='" + minX + "' y='" + minY + "'>" + calculateEnergy() + "</text>");
+//result.add("<circle cx='" + calcCenterX() + "' cy='" + calcCenterY() + "' r='5' fill='green' />");
         result.add("</svg>");
         return result.join("");
     }
@@ -186,6 +314,7 @@ result.add("<circle cx='" + calcCenterX() + "' cy='" + calcCenterY() + "' r='5' 
         }
     }
     public inline function stretch(fact:Float):Void {
+        centerPos();
         var cx:Float = calcCenterX();
         var cy:Float = calcCenterY();
         for(node in nodes) {
@@ -317,12 +446,9 @@ result.add("<circle cx='" + calcCenterX() + "' cy='" + calcCenterY() + "' r='5' 
     }
 
 // TODO:
-//   - force directed method
 //   - approx
 //   - pca
-//   - center + rotate + stretch
 //   - dot output and graphviz txt output parsing
-//   - save/parsing
     public inline function slsSearch():Void {
 for(i in 0...1) sls1Step();
 //        while(sls1Step()) {}
@@ -380,4 +506,6 @@ for(i in 0...1) sls1Step();
         }
         return result;
     }
+
+public static inline function main():Void {}
 }
