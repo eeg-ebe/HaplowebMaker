@@ -104,67 +104,75 @@ class Graph {
         return result.join("\n");
     }
     public inline function parsePie(s:String):List<Pair<String,Int>> {
-return null; // TODO
+        var result:List<Pair<String,Int>> = new List<Pair<String,Int>>();
+        for(p in s.split("\x03")) {
+            var d:Array<String> = p.split("\x01");
+            result.add(new Pair<String,Int>(d[0], Std.parseInt(d[1])));
+        }
+        return result;
     }
     public inline function loadStyle(style:String):Void {
-        var lines:Array<String> = style.split("\n");
+        var lines:List<String> = new List<String>();
+        for(line in style.split("\n")) {
+            lines.add(line);
+        }
         // restore node style
         for(node in nodes) {
             var attrs:Array<String> = lines.pop().split("\x02");
-            node.xPos = Std.parseFloat(attrs.pop());
-            node.yPos = Std.parseFloat(attrs.pop());
-            node.radius = Std.parseFloat(attrs.pop());
-            node.pie = parsePie(attrs.pop());
-            node.strokeColor = attrs.pop();
-            node.strokeWidth = Std.parseFloat(attrs.pop());
+            node.xPos = Std.parseFloat(attrs[0]);
+            node.yPos = Std.parseFloat(attrs[1]);
+            node.radius = Std.parseFloat(attrs[2]);
+            node.pie = parsePie(attrs[3]);
+            node.strokeColor = attrs[4];
+            node.strokeWidth = Std.parseFloat(attrs[5]);
             node.dashedArray = new List<Float>();
-            for(f in attrs.pop().split("|")) {
+            for(f in attrs[6].split("|")) {
                 node.dashedArray.add(Std.parseFloat(f));
             }
         }
         // restore connections
         for(con in cons) {
             var attrs:Array<String> = lines.pop().split("\x02");
-            con.strokeColor = attrs.pop();
-            con.strokeWidth = Std.parseFloat(attrs.pop());
+            con.strokeColor = attrs[0];
+            con.strokeWidth = Std.parseFloat(attrs[1]);
             con.dashedArray = new List<Float>();
-            for(f in attrs.pop().split("|")) {
+            for(f in attrs[2].split("|")) {
                 con.dashedArray.add(Std.parseFloat(f));
             }
-            con.drawMutsByLine = (attrs.pop() == "1");
-            con.drawMutsLineStrokeColor = attrs.pop();
-            con.drawMutsLineWidth = Std.parseFloat(attrs.pop());
-            con.drawMutsLineLen = Std.parseFloat(attrs.pop());
+            con.drawMutsByLine = (attrs[3] == "1");
+            con.drawMutsLineStrokeColor = attrs[4];
+            con.drawMutsLineWidth = Std.parseFloat(attrs[5]);
+            con.drawMutsLineLen = Std.parseFloat(attrs[6]);
             con.drawMutsLineDashedArray = new List<Float>();
-            for(f in attrs.pop().split("|")) {
+            for(f in attrs[7].split("|")) {
                 con.drawMutsLineDashedArray.add(Std.parseFloat(f));
             }
-            con.drawMutsByText = (attrs.pop() == "1");
-            con.drawMutsTextFont = attrs.pop();
-            con.drawMutsTextSize = Std.parseFloat(attrs.pop());
-            con.drawMutsTextColor = attrs.pop();
-            con.drawMutsTextPX = Std.parseFloat(attrs.pop());
-            con.drawMutsTextPY = Std.parseFloat(attrs.pop());
-            con.drawMutsByDots = (attrs.pop() == "1");
-            con.drawMutsDotsSize = Std.parseFloat(attrs.pop());
-            con.drawMutsDotsColor = attrs.pop();
+            con.drawMutsByText = (attrs[8] == "1");
+            con.drawMutsTextFont = attrs[9];
+            con.drawMutsTextSize = Std.parseFloat(attrs[10]);
+            con.drawMutsTextColor = attrs[11];
+            con.drawMutsTextPX = Std.parseFloat(attrs[12]);
+            con.drawMutsTextPY = Std.parseFloat(attrs[13]);
+            con.drawMutsByDots = (attrs[14] == "1");
+            con.drawMutsDotsSize = Std.parseFloat(attrs[15]);
+            con.drawMutsDotsColor = attrs[16];
             con.drawMutsDotsDashedArray = new List<Float>();
-            for(f in attrs.pop().split("|")) {
+            for(f in attrs[17].split("|")) {
                 con.drawMutsDotsDashedArray.add(Std.parseFloat(f));
             }
         }
         // restore links
         for(link in links) {
             var attrs:Array<String> = lines.pop().split("\x02");
-            link.w = Std.parseFloat(attrs.pop());
-            link.strokeColor = attrs.pop();
-            link.strokeWidth = Std.parseFloat(attrs.pop());
+            link.w = Std.parseFloat(attrs[0]);
+            link.strokeColor = attrs[1];
+            link.strokeWidth = Std.parseFloat(attrs[2]);
             link.dashedArray = new List<Float>();
-            for(f in attrs.pop().split("|")) {
+            for(f in attrs[3].split("|")) {
                 link.dashedArray.add(Std.parseFloat(f));
             }
-            link.xPos = Std.parseFloat(attrs.pop());
-            link.yPos = Std.parseFloat(attrs.pop());
+            link.xPos = Std.parseFloat(attrs[4]);
+            link.yPos = Std.parseFloat(attrs[5]);
         }
     }
 
@@ -354,7 +362,7 @@ return null; // TODO
         return 10 * Math.random() * ((Math.random() > 0.5) ? 1 : -1);
     }
 
-    public inline function forceDirectedMethod(setRandomInitial:Bool, damping:Float, smE:Float, ?kn:Float=1.0, ?ks:Float=0.2, ?kc:Float=5.0, ?steps:Int=1000):Void {
+    public inline function forceDirectedMethod(setRandomInitial:Bool, damping:Float, smE:Float, ?kn:Float=1.0, ?ks:Float=0.2, ?kc:Float=5.0, ?steps:Int=1000, ?remVelocity:Bool=true):Float {
         // set random initial if needed
         if(setRandomInitial) {
             assignRandomNodePos();
@@ -362,9 +370,11 @@ return null; // TODO
             checkNoNodeAtSamePoint();
         }
         // set the initial node velocity
-        for(node in nodes) {
-            node.velocityX = 0;
-            node.velocityY = 0;
+        if(remVelocity) {
+            for(node in nodes) {
+                node.velocityX = 0;
+                node.velocityY = 0;
+            }
         }
         // some main loop parameters
         var tE:Float = 0;
@@ -443,6 +453,7 @@ return null; // TODO
                 stopCritSteps = true;
             }
         } while(tE > smE && !stopCritSteps);
+        return tE;
     }
 
 // TODO:
