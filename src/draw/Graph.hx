@@ -299,6 +299,8 @@ class Graph {
         }
     }
 
+    public inline function 
+
     public inline function calcCenterX():Float {
         var rx:Float = 0;
         for(node in nodes) {
@@ -353,9 +355,6 @@ class Graph {
             node.yPos = cy + vY;
         }
         centerPos();
-    }
-    public inline function approxAlgo():Void {
-        // TODO
     }
 
     public inline function fluct():Float {
@@ -457,47 +456,8 @@ class Graph {
     }
 
 // TODO:
-//   - approx
 //   - pca
 //   - dot output and graphviz txt output parsing
-    public inline function slsSearch():Void {
-for(i in 0...1) sls1Step();
-//        while(sls1Step()) {}
-    }
-
-    public inline function sls1Step():Bool {
-        var result:Bool = false;
-        var minEnergy:Float = calculateEnergy();
-        for(node in nodes) {
-            // save the original positions
-            var xPos:Float = node.xPos;
-            var yPos:Float = node.yPos;
-            // change positions
-            var better:Bool = true;
-            while(better) {
-                better = false;
-                for(dx in -1...2) { // -1, 0, 1
-                    for(dy in -1...2) { // -1, 0, 1
-                        node.xPos = xPos + dx;
-                        node.yPos = yPos + dy;
-                        var newEn:Float = calculateEnergy();
-                        if(newEn < minEnergy) {
-                            better = true;
-                            result = true;
-                            minEnergy = newEn;
-                            xPos = node.xPos;
-                            yPos = node.yPos;
-                        }
-                    }
-                }
-            }
-            // if there is no current better position for this node => restore!
-            node.xPos = xPos;
-            node.yPos = yPos;
-        }
-        return result;
-    }
-
     public inline function calculateEnergy():Float {
         var result:Float = 0;
         // energy of nodes
