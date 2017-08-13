@@ -8,7 +8,21 @@ class Graph {
     public var cons:List<Connection>;
     public var links:List<Link>;
 
+    public var drawCircles:Bool=true;
+    public var drawCons:Bool=true;
+    public var drawCurves:Bool=true;
+    public var drawBezierPoints:Bool=false;
+    public var drawCenter:Bool=false;
+    public var drawAngles:Bool=false;
+
     public inline function new(l:List<Node>) {
+        // assign default drawing
+        drawCircles=true;
+        drawCons=true;
+        drawCurves=true; 
+        drawBezierPoints=false;
+        drawCenter=false;
+        drawAngles=false;
         // create objects
         nodes = new List<NodePos>();
         cons = new List<Connection>();
@@ -18,13 +32,14 @@ class Graph {
             nodes.add(new NodePos(e));
         }
         // fill out connections/links
+        var nextConId:Int = 0;
         for(node1 in nodes) {
             for(node2 in nodes) {
                 if(node1.node.id > node2.node.id) {
                     // check if in cons
                     for(con in node2.node.cons) {
                         if(con.first == node1.node.id) {
-                            cons.add(new Connection(node1, node2, con.second));
+                            cons.add(new Connection(nextConId++, node1, node2, con.second));
                             break;
                         }
                     }
@@ -40,6 +55,89 @@ class Graph {
         }
     }
 
+    public inline function assignMutsLines(drawMutsByLine:Bool, drawMutsLineStrokeColor:String, drawMutsLineWidth:Float, drawMutsLineLen:Float, drawMutsLineDashedArray:Array<Float>):Void {
+        var drawMutsLineDashedArray_:List<Float> = new List<Float>();
+        for(e in drawMutsLineDashedArray) {
+            drawMutsLineDashedArray_.add(e);
+        }
+        for(con in cons) {
+            con.drawMutsByLine = drawMutsByLine;
+            con.drawMutsLineStrokeColor = drawMutsLineStrokeColor;
+            con.drawMutsLineWidth = drawMutsLineWidth;
+            con.drawMutsLineLen = drawMutsLineLen;
+            con.drawMutsLineDashedArray = drawMutsLineDashedArray_;
+        }
+    }
+    public inline function assignMutsText(drawMutsByText:Bool, drawMutsTextFont:String, drawMutsTextSize:Float, drawMutsTextColor:String, drawMutsTextPX:Float, drawMutsTextPY:Float) {
+        for(con in cons) {
+            con.drawMutsByText = drawMutsByText;
+            con.drawMutsTextFont = drawMutsTextFont;
+            con.drawMutsTextSize = drawMutsTextSize;
+            con.drawMutsTextColor = drawMutsTextColor;
+            con.drawMutsTextPX = drawMutsTextPX;
+            con.drawMutsTextPY = drawMutsTextPY;
+        }
+    }
+    public inline function assignButsByDots(drawMutsByDots:Bool, drawMutsDotsSize:Float, drawMutsDotsColor:String, drawMutsDotsDashedArray:Array<Float>) {
+        var drawMutsDotsDashedArray_:List<Float> = new List<Float>();
+        for(e in drawMutsDotsDashedArray) {
+            drawMutsDotsDashedArray_.add(e);
+        }
+        for(con in cons) {
+            con.drawMutsByDots = drawMutsByDots;
+            con.drawMutsDotsSize = drawMutsDotsSize;
+            con.drawMutsDotsColor = drawMutsDotsColor;
+            con.drawMutsDotsDashedArray = drawMutsDotsDashedArray_;
+        }
+    }
+
+    public inline function getNearestO(x:Float, y:Float):Dynamic {
+        // calculate view box
+        var maxX:Float = Math.NEGATIVE_INFINITY;
+        var maxY:Float = Math.NEGATIVE_INFINITY;
+        var minX:Float = Math.POSITIVE_INFINITY;
+        var minY:Float = Math.POSITIVE_INFINITY;
+        for(node in nodes) {
+            maxX = Math.max(maxX, node.maxX());
+            maxY = Math.max(maxY, node.maxY());
+            minX = Math.min(minX, node.minX());
+            minY = Math.min(minY, node.minY());
+        }
+        for(link in links) {
+            var x:Float = link.getMMX(); var y:Float = link.getMMY();
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+        }
+        // now transform
+        x = x + minX - 15;
+        y = y + minY - 15;
+        // search
+        var result:Dynamic = null;
+        var best:Float = Math.POSITIVE_INFINITY;
+        var d:Float = 0;
+        if(drawCircles) {
+            for(o in nodes) {
+                d = dist(x, y, o.xPos, o.yPos);
+                if(d < best) {
+                    best = d;
+                    result = o;
+                }
+            }
+        }
+        if(drawBezierPoints) {
+            for(o in links) {
+                d = dist(x, y, o.xPos, o.yPos);
+                if(d < best) {
+                    best = d;
+                    result = o;
+                }
+            }
+        }
+        return result;
+    }
+
     private inline function pieToTxt(pie:List<Pair<String,Int>>):String {
         var result:List<String> = new List<String>();
         for(p in pie) {
@@ -49,6 +147,15 @@ class Graph {
     }
     public inline function saveStyle():String {
         var result:List<String> = new List<String>();
+        // defaults
+        var n:List<String> = new List<String>();
+        n.add((drawCircles) ? "1" : "0");
+        n.add((drawCons) ? "1" : "0");
+        n.add((drawCurves) ? "1" : "0");
+        n.add((drawBezierPoints) ? "1" : "0");
+        n.add((drawCenter) ? "1" : "0");
+        n.add((drawAngles) ? "1" : "0");
+        result.add(n.join("\x02"));
         // all nodes
         for(node in nodes) {
             var n:List<String> = new List<String>();
@@ -116,6 +223,14 @@ class Graph {
         for(line in style.split("\n")) {
             lines.add(line);
         }
+        // restore drawings
+        var attrs:Array<String> = lines.pop().split("\x02");
+        drawCircles = (attrs[0] == "1");
+        drawCons = (attrs[1] == "1");
+        drawCurves = (attrs[2] == "1");
+        drawBezierPoints = (attrs[3] == "1");
+        drawCenter = (attrs[4] == "1");
+        drawAngles = (attrs[5] == "1");
         // restore node style
         for(node in nodes) {
             var attrs:Array<String> = lines.pop().split("\x02");
@@ -176,7 +291,7 @@ class Graph {
         }
     }
 
-    public inline function getSvgCode():String {
+    public inline function getSvgCode() {
         // calculate view box
         var maxX:Float = Math.NEGATIVE_INFINITY;
         var maxY:Float = Math.NEGATIVE_INFINITY;
@@ -202,19 +317,82 @@ class Graph {
         result.add("<svg version='1.1' baseProfile='full' width='" + width);
         result.add("' height='" + height);
         result.add("' viewBox='" + (minX - 15) + "," + (minY - 15) + "," + width + "," + height + "' xmlns='http://www.w3.org/2000/svg'>");
-        for(con in cons) {
-            result.add(con.getNodeSvg());
+        if(drawCons) {
+            for(con in cons) {
+                result.add(con.getNodeSvg());
+            }
         }
-        result.add("<g fill='none'>");
-        for(link in links) {
-            result.add(link.getLinkSvg());
+        if(drawCurves) {
+            result.add("<g fill='none'>");
+            for(link in links) {
+                result.add(link.getLinkSvg());
+            }
+            result.add("</g>");
         }
-        result.add("</g>");
-        for(node in nodes) {
-            result.add(node.getNodeSvg());
+        if(drawCircles) {
+            for(node in nodes) {
+                result.add(node.getNodeSvg());
+            }
+        }
+        if(drawAngles) {
+            for(c1 in cons) {
+                for(c2 in cons) {
+                    if(c1.id > c2.id) {
+                        // get the node
+                        var nA:NodePos = null;
+                        var nB:NodePos = null;
+                        var nC:NodePos = null;
+                        if(c1.n1 == c2.n1) {
+                            nA = c1.n2;
+                            nB = c2.n2;
+                            nC = c1.n1;
+                        } else if(c1.n1 == c2.n2) { 
+                            nA = c1.n2;
+                            nB = c2.n1;
+                            nC = c1.n1;
+                        } else if(c1.n2 == c2.n1) {
+                            nA = c1.n1;
+                            nB = c2.n2;
+                            nC = c1.n2;
+                        } else if(c1.n2 == c2.n2) {
+                            nA = c1.n1;
+                            nB = c2.n1;
+                            nC = c1.n2;
+                        }
+                        // is there a nodepos?
+                        if(nC != null) {
+                            var v1X:Float = nA.xPos - nC.xPos;
+                            var v1Y:Float = nA.yPos - nC.yPos;
+                            var v2X:Float = nB.xPos - nC.xPos;
+                            var v2Y:Float = nB.yPos - nC.yPos;
+                            var l1:Float = Math.sqrt(v1X * v1X + v1Y * v1Y);
+                            var l2:Float = Math.sqrt(v2X * v2X + v2Y * v2Y);
+                            var c:Float = v1X * v2X + v1Y * v2Y;
+                            var wXV:Float = (v1X / l1) + (v2X / l2);
+                            var wYV:Float = (v1Y / l1) + (v2Y / l2);
+                            var wL:Float = Math.sqrt(wXV * wXV + wYV * wYV);
+                            var xx:Float = nC.xPos + (wXV / wL) * (nC.radius + 20);
+                            var yy:Float = nC.yPos + (wYV / wL) * (nC.radius + 20);
+                            var txt:String = ("" + (Math.acos(c / (l1 * l2)) * 360 / (2 * Math.PI))).substr(0, 6);
+                            result.add("<text x='" + xx + "' y='" + yy + "' text-anchor='middle'>" + txt + "</text>");
+                        }
+                    }
+                }
+            }
+        }
+        if(drawBezierPoints) {
+            for(link in links) {
+                result.add("<circle cx='" + link.xPos + "' cy='" + link.yPos + "' r='5' fill='" + link.strokeColor + "' />");
+            }
+        }
+        if(drawCenter) {
+            var x:Float = calcCenterX();
+            var y:Float = calcCenterY();
+            result.add("<line x1='" + x + "' y1='" + minY + "' x2='" + x + "' y2='" + maxY + "' stroke='green' stroke-dasharray='3 3' />");
+            result.add("<line x1='" + minX + "' y1='" + y + "' x2='" + maxX + "' y2='" + y + "' stroke='green' stroke-dasharray='3 3' />");
+            result.add("<circle cx='" + calcCenterX() + "' cy='" + calcCenterY() + "' r='5' fill='green' />");
         }
 //result.add("<text x='" + minX + "' y='" + minY + "'>" + calculateEnergy() + "</text>");
-//result.add("<circle cx='" + calcCenterX() + "' cy='" + calcCenterY() + "' r='5' fill='green' />");
         result.add("</svg>");
         return result.join("");
     }
@@ -298,8 +476,6 @@ class Graph {
             }
         }
     }
-
-    public inline function 
 
     public inline function calcCenterX():Float {
         var rx:Float = 0;
