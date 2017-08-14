@@ -234,16 +234,17 @@ class Graph {
         // restore node style
         for(node in nodes) {
             var attrs:Array<String> = lines.pop().split("\x02");
-            node.xPos = Std.parseFloat(attrs[0]);
-            node.yPos = Std.parseFloat(attrs[1]);
-            node.radius = Std.parseFloat(attrs[2]);
-            node.pie = parsePie(attrs[3]);
-            node.strokeColor = attrs[4];
-            node.strokeWidth = Std.parseFloat(attrs[5]);
-            node.dashedArray = new List<Float>();
+            node.set_xPos(Std.parseFloat(attrs[0]));
+            node.set_yPos(Std.parseFloat(attrs[1]));
+            node.set_radius(Std.parseFloat(attrs[2]));
+            node.set_pie(parsePie(attrs[3]));
+            node.set_strokeColor(attrs[4]);
+            node.set_strokeWidth(Std.parseFloat(attrs[5]));
+            var l:List<Float> = new List<Float>();
             for(f in attrs[6].split("|")) {
-                node.dashedArray.add(Std.parseFloat(f));
+                l.add(Std.parseFloat(f));
             }
+            node.set_dashedArray(l);
         }
         // restore connections
         for(con in cons) {
@@ -454,8 +455,8 @@ class Graph {
 
     public inline function assignRandomNodePos():Void {
         for(node in nodes) {
-            node.xPos = ((Math.random() > 0.5) ? -1 : 1) * 1000 * Math.random();
-            node.yPos = ((Math.random() > 0.5) ? -1 : 1) * 1000 * Math.random();
+            node.set_xPos(((Math.random() > 0.5) ? -1 : 1) * 1000 * Math.random());
+            node.set_yPos(((Math.random() > 0.5) ? -1 : 1) * 1000 * Math.random());
         }
         checkNoNodeAtSamePoint();
     }
@@ -467,8 +468,8 @@ class Graph {
                 needCheck = false;
                 for(node2 in nodes) {
                     if(node1.node.id > node2.node.id && node1.xPos == node2.xPos && node2.yPos == node2.yPos) {
-                        node1.xPos = ((Math.random() > 0.5) ? -1 : 1) * 1000 * Math.random();
-                        node1.yPos = ((Math.random() > 0.5) ? -1 : 1) * 1000 * Math.random();
+                        node1.set_xPos(((Math.random() > 0.5) ? -1 : 1) * 1000 * Math.random());
+                        node1.set_yPos(((Math.random() > 0.5) ? -1 : 1) * 1000 * Math.random());
                         needCheck = true;
                         break;
                     }
@@ -495,8 +496,8 @@ class Graph {
         var cx:Float = calcCenterX();
         var cy:Float = calcCenterY();
         for(node in nodes) {
-            node.xPos -= cx;
-            node.yPos -= cy;
+            node.set_xPos(node.xPos - cx);
+            node.set_yPos(node.yPos - cy);
         }
     }
     public inline function stretch(fact:Float):Void {
@@ -511,8 +512,8 @@ class Graph {
             vX *= fact;
             vY *= fact;
             // assign new pos
-            node.xPos = cx + vX;
-            node.yPos = cy + vY;
+            node.set_xPos(cx + vX);
+            node.set_yPos(cy + vY);
         }
     }
     public inline function rotate(angle:Float):Void {
@@ -527,8 +528,19 @@ class Graph {
             vX = vX * Math.cos(angle) - vY * Math.sin(angle);
             vY = vX * Math.sin(angle) + vY * Math.cos(angle);
             // assign new pos
-            node.xPos = cx + vX;
-            node.yPos = cy + vY;
+            node.set_xPos(cx + vX);
+            node.set_yPos(cy + vY);
+        }
+        for(link in links) {
+            // vect v from center to point
+            var vX:Float = link.xPos - cx;
+            var vY:Float = link.yPos - cy;
+            // stretch vector by fact
+            vX = vX * Math.cos(angle) - vY * Math.sin(angle);
+            vY = vX * Math.sin(angle) + vY * Math.cos(angle);
+            // assign new pos
+            link.set_xPos(cx + vX);
+            link.set_yPos(cy + vY);
         }
         centerPos();
     }
@@ -619,8 +631,8 @@ class Graph {
             for(node in nodes) {
                 node.velocityX = (node.velocityX + node.forceX) * damping;
                 node.velocityY = (node.velocityY + node.forceY) * damping;
-                node.xPos += node.velocityX;
-                node.yPos += node.velocityY;
+                node.set_xPos(node.xPos + node.velocityX);
+                node.set_yPos(node.yPos + node.velocityY);
                 var l:Float = Math.sqrt(node.velocityX * node.velocityX + node.velocityY * node.velocityY);
                 tE += l * l; // all nodes have mass 1
             }

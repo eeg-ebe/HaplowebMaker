@@ -4,24 +4,56 @@ import parsing.Node;
 import util.Pair;
 
 class NodePos {
-    public var node:Node;
+    public var node(default,null):Node;
 
-    public var xPos:Float;
-    public var yPos:Float;
+    public var xPos(default,null):Float;
+    public var yPos(default,null):Float;
 
-    public var radius:Float;
-    public var pie:List<Pair<String,Int>>;
+    public var radius(default,null):Float;
+    public var pie(default,null):List<Pair<String,Int>>;
 
-    public var strokeColor:String;
-    public var strokeWidth:Float;
-    public var dashedArray:List<Float>;
+    public var strokeColor(default,null):String;
+    public var strokeWidth(default,null):Float;
+    public var dashedArray(default,null):List<Float>;
 
     public var velocityX:Float;
     public var velocityY:Float;
     public var forceX:Float;
     public var forceY:Float;
 
+    private var valid:Bool;
+    private var svg:String;
+    public inline function set_xPos(n:Float):Void {
+        valid = false;
+        xPos = n;
+    }
+    public inline function set_yPos(n:Float):Void {
+        valid = false;
+        yPos = n;
+    }
+    public inline function set_radius(n:Float):Void {
+        valid = false;
+        radius = n;
+    }
+    public inline function set_pie(n:List<Pair<String,Int>>):Void {
+        valid = false;
+        pie = n;
+    }
+    public inline function set_strokeColor(n:String):Void {
+        valid = false;
+        strokeColor = n;
+    }
+    public inline function set_strokeWidth(n:Float):Void {
+        valid = false;
+        strokeWidth = n;
+    }
+    public inline function set_dashedArray(n:List<Float>):Void {
+        valid = false;
+        dashedArray = n;
+    }
+
     public inline function new(n:Node) {
+        valid = false;
         pie = new List<Pair<String,Int>>();
         this.node = n;
         this.radius = 3 + node.names.length;
@@ -36,6 +68,9 @@ class NodePos {
     }
 
     public inline function getNodeSvg():String {
+        if(valid) {
+            return svg;
+        }
         // preperation
         var result:List<String> = new List<String>();
         this.pie = this.pie.filter(function(t:Pair<String,Int>):Bool {
@@ -98,7 +133,9 @@ class NodePos {
             }
         }
         // result
-        return result.join("");
+        svg = result.join("");
+        valid = true;
+        return svg;
     }
 
     public inline function minX():Float {

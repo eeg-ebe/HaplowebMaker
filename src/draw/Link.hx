@@ -22,6 +22,13 @@ class Link {
     public var e1:Float;
     public var e2:Float;
 
+    public inline function set_xPos(n:Float):Void {
+        xPos = n;
+    }
+    public inline function set_yPos(n:Float):Void {
+        yPos = n;
+    }
+
     public inline function new(n1:NodePos,n2:NodePos,w:Float) {
         this.n1 = n1;
         this.n2 = n2;
