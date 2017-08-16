@@ -50,7 +50,7 @@ class MJNetParser {
             // read in the content of the line
             if(indents == 2 && Parse.startsWith(line_, "ID")) {
                 currentNode.id = Std.parseInt(line_.split(" ")[1]);
-            } else if(indents == 2 && Parse.startsWith(line_, "SPECIES_ID")) {
+            } else if(indents == 2 && Parse.startsWith(line_, "FFR_ID")) {
                 currentNode.spId = Std.parseInt(line_.split(" ")[1]);
             } else if(indents == 2 && Parse.startsWith(line_, "SEQUENCE")) {
                 currentNode.seq = line_.split(" ")[1];
@@ -92,7 +92,7 @@ class MJNetParser {
     }
 //SAMPLED_SEQUENCE
 //  ID 30
-//  SPECIES_ID 7
+//  FFR_ID 7
 //  SEQUENCE CGTCTCTTCAACG
 //  NB_NAMES 1
 //  NAMES

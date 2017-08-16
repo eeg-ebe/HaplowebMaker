@@ -238,7 +238,7 @@ class Seqs {
             // species id
             if(c.isSample) {
                 printer.printString(printer.indent);
-                printer.printString("SPECIES_ID ");
+                printer.printString("FFR_ID ");
                 printer.printString("" + c.spId);
                 printer.printString(printer.newline);
             }
