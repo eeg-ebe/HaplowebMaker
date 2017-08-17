@@ -83,10 +83,10 @@ class Connection {
                     result.add("<circle cx='");
                     result.add(x + "' cy='");
                     result.add(y + "' r='");
-                    result.add(drawMutsDotsSize + " fill='");
+                    result.add(drawMutsDotsSize + "' fill='");
                     result.add(drawMutsDotsColor);
                     if(!this.drawMutsDotsDashedArray.isEmpty()) {
-                        result.add(" stroke-dasharray='");
+                        result.add("' stroke-dasharray='");
                         result.add(this.drawMutsDotsDashedArray.join(","));
                         result.add("'");
                     }
