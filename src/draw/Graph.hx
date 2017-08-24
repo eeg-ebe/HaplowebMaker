@@ -516,17 +516,26 @@ class Graph {
             node.set_yPos(cy + vY);
         }
     }
+    public inline function mult_radius(v:Float):Void {
+        for(node in nodes) {
+            if(node.node.type == SAMPLED_SEQUENCE) {
+                node.set_radius(node.radius * v);
+            }
+        }
+    }
     public inline function rotate(angle:Float):Void {
         centerPos();
         var cx:Float = calcCenterX();
         var cy:Float = calcCenterY();
+        var cosA:Float = Math.cos(angle);
+        var sinA:Float = Math.sin(angle);
         for(node in nodes) {
             // vect v from center to point
             var vX:Float = node.xPos - cx;
             var vY:Float = node.yPos - cy;
             // stretch vector by fact
-            vX = vX * Math.cos(angle) - vY * Math.sin(angle);
-            vY = vX * Math.sin(angle) + vY * Math.cos(angle);
+            vX = vX * cosA - vY * sinA;
+            vY = vX * sinA + vY * cosA;
             // assign new pos
             node.set_xPos(cx + vX);
             node.set_yPos(cy + vY);
@@ -536,8 +545,8 @@ class Graph {
             var vX:Float = link.xPos - cx;
             var vY:Float = link.yPos - cy;
             // stretch vector by fact
-            vX = vX * Math.cos(angle) - vY * Math.sin(angle);
-            vY = vX * Math.sin(angle) + vY * Math.cos(angle);
+            vX = vX * cosA - vY * sinA;
+            vY = vX * sinA + vY * cosA;
             // assign new pos
             link.set_xPos(cx + vX);
             link.set_yPos(cy + vY);
