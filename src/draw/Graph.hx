@@ -523,33 +523,89 @@ class Graph {
             }
         }
     }
+    public inline function mirrorX():Void {
+        for(node in nodes) {
+            var vX:Float = -node.xPos;
+            var vY:Float = node.yPos;
+            // assign new pos
+            node.set_xPos(vX);
+            node.set_yPos(vY);
+        }
+        for(link in links) {
+            var vX:Float = -link.xPos;
+            var vY:Float = link.yPos;
+            // assign new pos
+            link.set_xPos(vX);
+            link.set_yPos(vY);
+        }
+    }
+    public inline function mirrorY():Void {
+        for(node in nodes) {
+            var vX:Float = node.xPos;
+            var vY:Float = -node.yPos;
+            // assign new pos
+            node.set_xPos(vX);
+            node.set_yPos(vY);
+        }
+        for(link in links) {
+            var vX:Float = link.xPos;
+            var vY:Float = -link.yPos;
+            // assign new pos
+            link.set_xPos(vX);
+            link.set_yPos(vY);
+        }
+    }
+    public inline function rotateP90():Void {
+        for(node in nodes) {
+            var vX:Float = -node.yPos;
+            var vY:Float = node.xPos;
+            // assign new pos
+            node.set_xPos(vX);
+            node.set_yPos(vY);
+        }
+        for(link in links) {
+            var vX:Float = -link.yPos;
+            var vY:Float = link.xPos;
+            // assign new pos
+            link.set_xPos(vX);
+            link.set_yPos(vY);
+        }
+    }
+    public inline function rotateN90():Void {
+        for(node in nodes) {
+            var vX:Float = node.yPos;
+            var vY:Float = -node.xPos;
+            // assign new pos
+            node.set_xPos(vX);
+            node.set_yPos(vY);
+        }
+        for(link in links) {
+            var vX:Float = link.yPos;
+            var vY:Float = -link.xPos;
+            // assign new pos
+            link.set_xPos(vX);
+            link.set_yPos(vY);
+        }
+    }
     public inline function rotate(angle:Float):Void {
         centerPos();
-        var cx:Float = calcCenterX();
-        var cy:Float = calcCenterY();
         var cosA:Float = Math.cos(angle);
         var sinA:Float = Math.sin(angle);
         for(node in nodes) {
             // vect v from center to point
-            var vX:Float = node.xPos - cx;
-            var vY:Float = node.yPos - cy;
-            // stretch vector by fact
-            vX = vX * cosA - vY * sinA;
-            vY = vX * sinA + vY * cosA;
+            var vX:Float = node.xPos * cosA - node.yPos * sinA;
+            var vY:Float = node.xPos * sinA + node.yPos * cosA;
             // assign new pos
-            node.set_xPos(cx + vX);
-            node.set_yPos(cy + vY);
+            node.set_xPos(vX);
+            node.set_yPos(vY);
         }
         for(link in links) {
             // vect v from center to point
-            var vX:Float = link.xPos - cx;
-            var vY:Float = link.yPos - cy;
-            // stretch vector by fact
-            vX = vX * cosA - vY * sinA;
-            vY = vX * sinA + vY * cosA;
+            var vX:Float = link.xPos * cosA - link.yPos * sinA;
+            var vY:Float = link.xPos * sinA + link.yPos * cosA;
             // assign new pos
-            link.set_xPos(cx + vX);
-            link.set_yPos(cy + vY);
+            link.set_xPos(vX);
+            link.set_yPos(vY);
         }
         centerPos();
     }
