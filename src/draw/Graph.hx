@@ -450,6 +450,11 @@ class Graph {
             bestLink.yPos = (bestLink.e1 < bestLink.e2) ? bestLink.y1 : bestLink.y2;
             // ok, create next list
             l.remove(bestLink);
+            // increase e of other links points
+            for(link in l) {
+                link.e1 += 1 / dist(bestLink.xPos, bestLink.yPos, link.x1, link.y1);
+                link.e2 += 1 / dist(bestLink.xPos, bestLink.yPos, link.x2, link.y2);
+            }
         }
     }
 
