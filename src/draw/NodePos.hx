@@ -31,6 +31,9 @@ class NodePos {
         valid = false;
         yPos = n;
     }
+    public inline function mult_radius(v:Float):Void {
+        set_radius(v * radius);
+    }
     public inline function set_radius(n:Float):Void {
         valid = false;
         radius = n;

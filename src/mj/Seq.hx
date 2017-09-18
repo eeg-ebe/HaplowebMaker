@@ -46,7 +46,7 @@ class Seq {
 
     // check whether an "individual identifier" can be found in the names of "individual identifiers" connected to this sequence.
     public static inline function getIndIdentifier(s:String):String {
-        var result:String = null;
+        var result:String = s;
         if(s != null) {
             var pos:Int = s.lastIndexOf("_");
             if(pos != -1) {
@@ -81,7 +81,7 @@ class Seq {
         }
         return result;
     }
-    // get the list of individual that present in the list and also connected to this sequence.
+    // get the list of individual present in the list and also connected to this sequence.
     public inline function cmpIndIdentifiers(o:List<String>):List<String> {
         var result:List<String> = new List<String>();
         for(e in o) {
