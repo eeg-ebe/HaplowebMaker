@@ -15,6 +15,8 @@ class Graph {
     public var drawCenter:Bool=false;
     public var drawAngles:Bool=false;
 
+    public var lastStretchFact:Float;
+
     public inline function new(l:List<Node>) {
         // assign default drawing
         drawCircles=true;
@@ -322,9 +324,9 @@ class Graph {
         if(oh == -1) {
             f2 = 1;
         }
-        var f:Float = Math.min(f1, f2);
-        ow = width * f;
-        oh = height * f;
+        lastStretchFact = Math.min(f1, f2);
+        ow = width * lastStretchFact;
+        oh = height * lastStretchFact;
         // draw
         var result:List<String> = new List<String>();
         result.add("<svg version='1.1' baseProfile='full' width='" + ow);
