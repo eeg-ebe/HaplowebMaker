@@ -292,7 +292,7 @@ class Graph {
         }
     }
 
-    public inline function getSvgCode() {
+    public inline function getSvgCode(?ow:Float=-1, ?oh:Float=-1) {
         // calculate view box
         var maxX:Float = Math.NEGATIVE_INFINITY;
         var maxY:Float = Math.NEGATIVE_INFINITY;
@@ -313,10 +313,22 @@ class Graph {
         }
         var width:Float = maxX - minX + 30;
         var height:Float = maxY - minY + 30;
+        // w/h
+        var f1:Float = ow / width;
+        if(ow == -1) {
+            f1 = 1;
+        }
+        var f2:Float = oh / height;
+        if(oh == -1) {
+            f2 = 1;
+        }
+        var f:Float = Math.min(f1, f2);
+        ow = width * f;
+        oh = height * f;
         // draw
         var result:List<String> = new List<String>();
-        result.add("<svg version='1.1' baseProfile='full' width='" + width);
-        result.add("' height='" + height);
+        result.add("<svg version='1.1' baseProfile='full' width='" + ow);
+        result.add("' height='" + oh);
         result.add("' viewBox='" + (minX - 15) + "," + (minY - 15) + "," + width + "," + height + "' xmlns='http://www.w3.org/2000/svg'>");
         if(drawCons) {
             for(con in cons) {
