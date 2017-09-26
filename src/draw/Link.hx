@@ -22,6 +22,8 @@ class Link {
     public var e1:Float;
     public var e2:Float;
 
+    public var setByUser:Bool;
+
     public inline function set_xPos(n:Float):Void {
         xPos = n;
     }
@@ -36,6 +38,7 @@ class Link {
         this.strokeColor = "blue";
         this.strokeWidth = w;
         this.dashedArray = new List<Float>();
+        this.setByUser = false;
     }
 
     public inline function calcCurve(a:Float, b:Float, c:Float, t:Float):Float {

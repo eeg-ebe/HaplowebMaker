@@ -397,7 +397,7 @@ class Graph {
         }
         if(drawBezierPoints) {
             for(link in links) {
-                result.add("<circle cx='" + link.xPos + "' cy='" + link.yPos + "' r='5' fill='" + link.strokeColor + "' />");
+                result.add("<circle cx='" + link.xPos + "' cy='" + link.yPos + "' r='5' fill='" + link.strokeColor + "' stroke='" + ((link.setByUser) ? "black" : "red") + "' />");
             }
         }
         if(drawCenter) {
@@ -418,33 +418,47 @@ class Graph {
         return Math.sqrt(dX*dX + dY*dY);
     }
 
-    public inline function assignLinkPos():Void {
+    public inline function assignLinkPos(?overwriteUser:Bool=true):Void {
         // create a list with all the links that we need to assign
         var l:List<Link> = new List<Link>();
         for(link in links) {
-            // remove maybe present older position data
-            link.xPos = Math.NaN;
-            link.yPos = Math.NaN;
-            // calculate the two positions
-            var vX:Float = link.n1.xPos - link.n2.xPos;
-            var vY:Float = link.n1.yPos - link.n2.yPos;
-            var vrX:Float = -vY / 8;
-            var vrY:Float = vX / 8;
-            var mX:Float = link.n2.xPos + vX / 2;
-            var mY:Float = link.n2.yPos + vY / 2;
-            link.x1 = mX - vrX;
-            link.y1 = mY - vrY;
-            link.x2 = mX + vrX;
-            link.y2 = mY + vrY;
-            // calculate the "energy" of the two positions
-            link.e1 = 0;
-            link.e2 = 0;
-            for(node in nodes) {
-                link.e1 += 1 / dist(node.xPos, node.yPos, link.x1, link.y1);
-                link.e2 += 1 / dist(node.xPos, node.yPos, link.x2, link.y2);
+            // do not move fixed(=moved by user) links
+            if(!overwriteUser && link.setByUser) {
+                continue;
+            } else {
+                // remove maybe present older position data
+                link.xPos = Math.NaN;
+                link.yPos = Math.NaN;
+                link.setByUser = false;
+                // calculate the two positions
+                var vX:Float = link.n1.xPos - link.n2.xPos;
+                var vY:Float = link.n1.yPos - link.n2.yPos;
+                var vrX:Float = -vY / 8;
+                var vrY:Float = vX / 8;
+                var mX:Float = link.n2.xPos + vX / 2;
+                var mY:Float = link.n2.yPos + vY / 2;
+                link.x1 = mX - vrX;
+                link.y1 = mY - vrY;
+                link.x2 = mX + vrX;
+                link.y2 = mY + vrY;
+                // calculate the "energy" of the two positions
+                link.e1 = 0;
+                link.e2 = 0;
+                for(node in nodes) {
+                    link.e1 += 1 / dist(node.xPos, node.yPos, link.x1, link.y1);
+                    link.e2 += 1 / dist(node.xPos, node.yPos, link.x2, link.y2);
+                }
+                if(!overwriteUser) {
+                    for(link2 in links) {
+                        if(link2.setByUser) {
+                            link.e1 += 1 / dist(link2.xPos, link2.yPos, link.x1, link.y1);
+                            link.e2 += 1 / dist(link2.xPos, link2.yPos, link.x2, link.y2);
+                        }
+                    }
+                }
+                // save
+                l.add(link);
             }
-            // save
-            l.add(link);
         }
         // assign positions
         while(!l.isEmpty()) {
