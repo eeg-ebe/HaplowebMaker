@@ -544,6 +544,27 @@ class MJAlgo {
     public inline function getNrFFRs():Int {
         return this.nextSpId;
     }
+    public inline function countIndiv():Int {
+        var l:List<String> = new List<String>();
+        var current:Seq = seqs.first;
+        var inLst:Bool = false;
+        while(current != null && current.isSample) {
+            for(indName in current.indNames) {
+                inLst = false;
+                for(name in l) {
+                    if(name == indName) {
+                        inLst = true;
+                        break;
+                    }
+                }
+                if(!inLst) {
+                    l.add(indName);
+                }
+            }
+            current = current.next;
+        }
+        return l.length;
+    }
 
     public static function main():Void {
 /*
