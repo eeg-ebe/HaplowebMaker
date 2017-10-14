@@ -19,6 +19,9 @@ class Seq {
     // the previous sequence with this hashCode
     public var prevWithHash:Seq;
 
+    // Issue #10: Allow users to choose between different delimiters
+    private static var delimiter = "_";
+
     // calculate the hashcode for a string ...
     public static inline function calcHash(s:String):Int {
         #if asserts
@@ -48,7 +51,7 @@ class Seq {
     public static inline function getIndIdentifier(s:String):String {
         var result:String = s;
         if(s != null) {
-            var pos:Int = s.lastIndexOf("_");
+            var pos:Int = s.lastIndexOf(delimiter);
             if(pos != -1) {
                 result = s.substr(0, pos);
             }
