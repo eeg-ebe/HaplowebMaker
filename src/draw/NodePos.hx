@@ -4,6 +4,8 @@ import parsing.Node;
 import util.Pair;
 
 class NodePos {
+    public static var areaShouldBePropToNrInd:Bool = false;
+
     public var node(default,null):Node;
 
     public var xPos(default,null):Float;
@@ -59,7 +61,11 @@ class NodePos {
         valid = false;
         pie = new List<Pair<String,Int>>();
         this.node = n;
-        this.radius = 3 + node.names.length;
+        if(areaShouldBePropToNrInd) {
+            this.radius = 3 + Math.sqrt(node.names.length);
+        } else {
+            this.radius = 3 + node.names.length;
+        }
         if(this.node.type == MEDIAN_VECTOR) {
             this.strokeColor = "grey";
             this.strokeWidth = 1;
