@@ -160,4 +160,11 @@ class NodePos {
         return yPos + radius;
     }
 
+    // Issue #1: Haplotype identification in the network
+    public function getDivContent():String {
+        var result:String = "<table>"; // TODO
+        result += "<tr><td>Id</td><td>" + this.node.id + "</td></tr>";
+        result += "</table>";
+        return result;
+    }
 }
