@@ -8,7 +8,7 @@ import util.StdOutPrinter;
  * This class implements the MJ algorithm.
  */
 class MJAlgo {
-    public static var version(default, null):String = "1.0.1";
+    public static var version(default, null):String = "1.0.2";
 
     private var seqs:Seqs;
 
