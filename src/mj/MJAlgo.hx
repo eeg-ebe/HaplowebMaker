@@ -372,7 +372,6 @@ class MJAlgo {
             trace("  ",i++,m.s1,m.s2,m.s3,m.dist);
         }
         #end
-        var nrSeqsAdded:Int = 0;
         // sort vectors by distance (lowest distances first)
         var sortedMeds:List<List<Median>> = new List<List<Median>>();
         for(med in medLst) {
@@ -406,12 +405,13 @@ class MJAlgo {
         }
         #end
         // check median vectors and add them ...
+        var nrSeqsAdded:Int = 0;
         var lambda:Float = Math.POSITIVE_INFINITY;
         for(med in medLst) {
             #if asserts
             if(med.diffPos == 0) throw "WTF? No differntiating position found!";
             #end
-            if(med.diffPos > 1 && med.dist <= lambda + epsilon) { // connection does not exceed lambda + epsilon (even if lambda not set ...)
+            if(med.diffPos >= 1 && med.dist <= lambda + epsilon) { // connection does not exceed lambda + epsilon (even if lambda not set ...)
                 for(medV in med.constructMedians()) {
                     if(seqs.containsMed(medV)) continue; // do nothing if sequence is already in the set of sequences
                     lambda = Math.min(lambda, med.dist); // we found a sequence - so set new lamdba value
