@@ -140,6 +140,17 @@ class Graph {
         return result;
     }
 
+    public inline function getNodeById(id:Int):NodePos {
+        var result:NodePos = null;
+        for(node in nodes) {
+            if(node.node.id == id) {
+                result = node;
+                break;
+            }
+        }
+        return result;
+    }
+
     private inline function pieToTxt(pie:List<Pair<String,Int>>):String {
         var result:List<String> = new List<String>();
         for(p in pie) {

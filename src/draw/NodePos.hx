@@ -44,6 +44,16 @@ class NodePos {
         valid = false;
         pie = n;
     }
+    public inline function set_pieByArrays(n1:Array<String>, n2:Array<Int>):Void {
+        if(n1.length != n2.length) {
+            throw "n1 and n2 differ in size!";
+        }
+        var l:List<Pair<String,Int>> = new List<Pair<String,Int>>();
+        for(i in 0...n1.length) {
+            l.add(new Pair<String, Int>(n1[i], n2[i]));
+        }
+        this.set_pie(l);
+    }
     public inline function set_strokeColor(n:String):Void {
         valid = false;
         strokeColor = n;
@@ -112,15 +122,14 @@ class NodePos {
         result.add("' ");
         // pie
         if(this.pie.isEmpty()) {
-            result.add("fill='");
-            result.add("blue");
+            result.add("fill='blue'");
         } else if(this.pie.length == 1) {
             result.add("fill='");
             result.add(pie.first().first);
+            result.add("' ");
         } else {
             needArcs = true;
         }
-        result.add("' ");
         result.add("/>");
         // arcs
         if(needArcs) {
@@ -133,12 +142,12 @@ class NodePos {
                 var color:String = p.first;
                 var perc:Float = p.second / summe;
                 var pX1:Float = Math.sin(cs / summe * 2 * Math.PI) * this.radius + this.xPos;
-                var pY1:Float = -Math.cos(cs / summe * 2 * Math.PI) * this.radius + this.xPos;
+                var pY1:Float = -Math.cos(cs / summe * 2 * Math.PI) * this.radius + this.yPos;
                 cs += p.second;
                 var pX2:Float = Math.sin(cs / summe * 2 * Math.PI) * this.radius + this.xPos;
-                var pY2:Float = -Math.cos(cs / summe * 2 * Math.PI) * this.radius + this.xPos;
+                var pY2:Float = -Math.cos(cs / summe * 2 * Math.PI) * this.radius + this.yPos;
                 var arcFlag:Int = (perc < 0.5) ? 0 : 1;
-                result.add("<path fill='" + color + "' d='M" + this.xPos + "," + this.yPos + " L" + pX1 + "," + pY1 + " A" + this.radius + "," + this.radius + " 1 " + arcFlag + ",1 " + pX2 + ", " + pY2 + " z'/>");
+                result.add("<path fill='" + color + "' d='M" + this.xPos + "," + this.yPos + "L" + pX1 + "," + pY1 + "A" + this.radius + "," + this.radius + " 1 " + arcFlag + ",1 " + pX2 + ", " + pY2 + " z'/>");
             }
         }
         // result
