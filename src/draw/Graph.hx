@@ -152,14 +152,15 @@ class Graph {
         return result;
     }
 
-    public inline function assingPiesByTxt(s:String, ignoreCase:Bool):Void {
-        assignPieCharts(LstParser.parseLst(s), ignoreCase);
+    public inline function assingPiesByTxt(s:String, ignoreCase:Bool, byIndNameOnly:Bool):Void {
+        assignPieCharts(LstParser.parseLst(s), ignoreCase, byIndNameOnly);
     }
-    public inline function assignPieCharts(l:List<Pair<String,String>>, ignoreCase:Bool):Void {
+    public inline function assignPieCharts(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool):Void {
         for(node in nodes) {
-            node.set_pieByLst(l, ignoreCase);
+            node.set_pieByLst(l, ignoreCase, byIndNameOnly);
         }
     }
+    public inline function colorNetwork():Void {}// TODO
 
     private inline function pieToTxt(pie:List<Pair<String,Int>>):String {
         var result:List<String> = new List<String>();

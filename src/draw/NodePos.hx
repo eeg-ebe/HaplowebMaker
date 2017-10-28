@@ -2,6 +2,7 @@ package draw;
 
 import parsing.Node;
 import util.Pair;
+import mj.Seq;
 
 class NodePos {
     public static var areaShouldBePropToNrInd:Bool = false;
@@ -54,9 +55,12 @@ class NodePos {
         }
         this.set_pie(l);
     }
-    public inline function set_pieByLst(l:List<Pair<String,String>>, ignoreCase:Bool):Void {
+    public inline function set_pieByLst(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool):Void {
         var l_:List<Pair<String,Int>> = new List<Pair<String,Int>>();
         for(name in node.names) {
+            if(byIndNameOnly) {
+                name = Seq.getIndIdentifier(name);
+            }
             var colorName:String = null;
             for(p in l) {
                 if(ignoreCase) {
