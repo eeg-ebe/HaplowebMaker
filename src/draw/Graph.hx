@@ -160,7 +160,77 @@ class Graph {
             node.set_pieByLst(l, ignoreCase, byIndNameOnly);
         }
     }
-    public inline function colorNetwork():Void {}// TODO
+    public static inline function generateRandomHex():String {
+        var rand:Float = Math.random();
+        var result:String = null;
+        if(rand <= 1.0/16) {
+            result = "0";
+        } else if(rand <= 2.0/16) {
+            result = "1";
+        } else if(rand <= 3.0/16) {
+            result = "2";
+        } else if(rand <= 4.0/16) {
+            result = "3";
+        } else if(rand <= 5.0/16) {
+            result = "4";
+        } else if(rand <= 6.0/16) {
+            result = "5";
+        } else if(rand <= 7.0/16) {
+            result = "6";
+        } else if(rand <= 8.0/16) {
+            result = "7";
+        } else if(rand <= 9.0/16) {
+            result = "8";
+        } else if(rand <= 10.0/16) {
+            result = "9";
+        } else if(rand <= 11.0/16) {
+            result = "A";
+        } else if(rand <= 12.0/16) {
+            result = "B";
+        } else if(rand <= 13.0/16) {
+            result = "C";
+        } else if(rand <= 14.0/16) {
+            result = "D";
+        } else if(rand <= 15.0/16) {
+            result = "E";
+        } else {
+            result = "F";
+        }
+        return result;
+    }
+    public inline function generateRandomColor():String {
+        return "#" + generateRandomHex() + generateRandomHex() + generateRandomHex() + generateRandomHex() + generateRandomHex() + generateRandomHex();
+    }
+    public function colorfyFFR(n:NodePos, s:String):Void {
+        // TODO
+        n.set_color(s);
+        n.isProcessed = true;
+        for(link in links) {
+            if(link.n1 == n) {
+                link.strokeColor = s;
+                if(!link.n2.isProcessed) {
+                    colorfyFFR(link.n2, s);
+                }
+            }
+            if(link.n2 == n) {
+                link.strokeColor = s;
+                if(!link.n1.isProcessed) {
+                    colorfyFFR(link.n1, s);
+                }
+            }
+        }
+    }
+    public inline function colorNetwork():Void {
+        for(node in nodes) {
+            node.isProcessed = false;
+        }
+        for(node in nodes) {
+            if(node.isProcessed) {
+                continue;
+            }
+            colorfyFFR(node, generateRandomColor());
+        }
+    }
 
     private inline function pieToTxt(pie:List<Pair<String,Int>>):String {
         var result:List<String> = new List<String>();

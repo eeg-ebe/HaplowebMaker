@@ -24,6 +24,8 @@ class NodePos {
     public var forceX:Float;
     public var forceY:Float;
 
+    public var isProcessed:Bool;
+
     private var valid:Bool;
     private var svg:String;
     public inline function set_xPos(n:Float):Void {
@@ -53,6 +55,11 @@ class NodePos {
         for(i in 0...n1.length) {
             l.add(new Pair<String, Int>(n1[i], n2[i]));
         }
+        this.set_pie(l);
+    }
+    public inline function set_color(s:String) {
+        var l:List<Pair<String,Int>> = new List<Pair<String,Int>>();
+        l.add(new Pair<String,Int>(s, 1));
         this.set_pie(l);
     }
     public inline function set_pieByLst(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool):Void {
