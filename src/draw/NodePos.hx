@@ -54,6 +54,37 @@ class NodePos {
         }
         this.set_pie(l);
     }
+    public inline function set_pieByLst(l:List<Pair<String,String>>, ignoreCase:Bool):Void {
+        var l_:List<Pair<String,Int>> = new List<Pair<String,Int>>();
+        for(name in node.names) {
+            var colorName:String = null;
+            for(p in l) {
+                if(ignoreCase) {
+                    if(p.first.toUpperCase() == name.toUpperCase()) {
+                        colorName = p.second.toLowerCase();
+                        break;
+                    }
+                } else {
+                    if(p.first == name) {
+                        colorName = p.second.toLowerCase();
+                        break;
+                    }
+                }
+            }
+            var found:Bool = false;
+            for(p in l_) {
+                if(p.first == colorName) {
+                    p.second++;
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                l_.add(new Pair<String,Int>(colorName, 1));
+            }
+        }
+        this.set_pie(l_);
+    }
     public inline function set_strokeColor(n:String):Void {
         valid = false;
         strokeColor = n;

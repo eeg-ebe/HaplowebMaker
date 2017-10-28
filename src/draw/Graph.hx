@@ -1,6 +1,7 @@
 package draw;
 
 import parsing.Node;
+import parsing.LstParser;
 import util.Pair;
 
 class Graph {
@@ -149,6 +150,15 @@ class Graph {
             }
         }
         return result;
+    }
+
+    public inline function assingPiesByTxt(s:String, ignoreCase:Bool):Void {
+        assignPieCharts(LstParser.parseLst(s), ignoreCase);
+    }
+    public inline function assignPieCharts(l:List<Pair<String,String>>, ignoreCase:Bool):Void {
+        for(node in nodes) {
+            node.set_pieByLst(l, ignoreCase);
+        }
     }
 
     private inline function pieToTxt(pie:List<Pair<String,Int>>):String {
