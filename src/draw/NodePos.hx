@@ -82,6 +82,9 @@ class NodePos {
                     }
                 }
             }
+if(colorName == null) {
+    trace("WARN: No colorname found/given for '" + name + "'!");
+}
             var found:Bool = false;
             for(p in l_) {
                 if(p.first == colorName) {

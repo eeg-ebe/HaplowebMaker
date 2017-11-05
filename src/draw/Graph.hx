@@ -202,7 +202,6 @@ class Graph {
         return "#" + generateRandomHex() + generateRandomHex() + generateRandomHex() + generateRandomHex() + generateRandomHex() + generateRandomHex();
     }
     public function colorfyFFR(n:NodePos, s:String):Void {
-        // TODO
         n.set_color(s);
         n.isProcessed = true;
         for(link in links) {
@@ -226,6 +225,10 @@ class Graph {
         }
         for(node in nodes) {
             if(node.isProcessed) {
+                continue;
+            }
+            if(node.node.names.length == 0) {
+                node.set_color("grey");
                 continue;
             }
             colorfyFFR(node, generateRandomColor());
