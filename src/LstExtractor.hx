@@ -21,7 +21,8 @@ class LEle {
 }
 
 class LstExtractor {
-    public static inline function extract(p:Printer, s:String, onlyInd:Bool, sort:Bool, sortAlpha:Bool, outputSet:Bool) {
+    public static inline function extract(p:Printer, s:String, onlyInd:Bool, sort:Bool, sortAlpha:Bool, outputSet:Bool, sep:String) {
+        Seq.delimiter = sep;
         // parse the whole string
         var net:List<Node> = MJNetParser.parseNet(s);
         // ok, now read names and spIds from the parsed object
@@ -96,7 +97,7 @@ class LstExtractor {
     public static inline function main():Void {
         #if (cpp || cs || java || macro || neko || php || python)
         var myArgs:Array<String> = Sys.args();
-        extract(new StdOutPrinter(), sys.io.File.getContent(myArgs[0]), true, true, true, false);
+        extract(new StdOutPrinter(), sys.io.File.getContent(myArgs[0]), true, true, true, false, "_");
         #end
     }
 }

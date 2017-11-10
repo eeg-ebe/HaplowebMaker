@@ -20,7 +20,7 @@ class Seq {
     public var prevWithHash:Seq;
 
     // Issue #10: Allow users to choose between different delimiters
-    private static var delimiter = "_";
+    public static var delimiter = "_";
 
     // calculate the hashcode for a string ...
     public static inline function calcHash(s:String):Int {
