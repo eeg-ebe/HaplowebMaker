@@ -50,15 +50,15 @@ class CoMa {
         return "rgb(" + Std.int(r) + "," + Std.int(g) + "," + Std.int(b) + ")";
     }
 
-    public static function runComaJS(a:Array<String>, printer:Printer):Void {
+    public static function runComaJS(a:Array<String>, printer:Printer, printer2:Printer):Void {
         var l:List<List<Pair<String, String>>> = new List<List<Pair<String, String>>>();
         for(i in 0...a.length) {
             l.add(LstParser.parseLst(a[i]));
         }
-        runComa(l, printer);
+        runComa(l, printer, printer2);
     }
 
-    public static function runComa(l:List<List<Pair<String, String>>>, printer:Printer):Void {
+    public static function runComa(l:List<List<Pair<String, String>>>, printer:Printer, printer2:Printer):Void {
 trace("runningComa on " + l.length + " " + l.first().length);
         // 1. Step Table
         var comaIndL:List<CoMaInd> = new List<CoMaInd>();
@@ -147,7 +147,20 @@ trace("runningComa on " + l.length + " " + l.first().length);
                 }
             }
         }
-        // 3. Step Output
+        // 3. Step Output Table
+        for(e in orderedL) {
+            printer2.printString("\t" + e.indName);
+        }
+        printer2.printString("\n");
+        for(e1 in orderedL) {
+            printer2.printString(e1.indName);
+            for(e2 in orderedL) {
+                var dist:Float = e1.compare(e2);
+                printer2.printString("\t" + dist);
+            }
+            printer2.printString("\n");
+        }
+        // 4. Step Output SVG
         var width:Float = 100 + orderedL.length * 20 + 5;
         var height:Float = 100 + orderedL.length * 20 + 5;
         printer.printString("<svg version=\"1.1\" baseProfile=\"full\" width=\"" + width + "\" height=\"" + height + "\" xmlns=\"http://www.w3.org/2000/svg\">");
