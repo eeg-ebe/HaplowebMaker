@@ -836,6 +836,22 @@ class Graph {
         return tE;
     }
 
+    public function modifyLinks(f:Float):Void {
+        for(l in links) {
+            l.strokeWidth *= f;
+        }
+    }
+    public function modifyCons(f:Float):Void {
+        for(c in cons) {
+            c.strokeWidth *= f;
+        }
+    }
+    public function modifyNodes(f:Float):Void {
+        for(n in nodes) {
+            n.mult_radius(f);
+        }
+    }
+
 // TODO:
 //   - pca
 //   - dot output and graphviz txt output parsing
