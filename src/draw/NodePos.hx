@@ -126,7 +126,7 @@ if(colorName == null) {
             this.strokeWidth = 1;
         } else {
             this.strokeColor = "black";
-            this.strokeWidth = 3;
+            this.strokeWidth = 1;
         }
         dashedArray = new List<Float>();
     }

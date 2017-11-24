@@ -157,6 +157,10 @@ class Graph {
     }
     public inline function assignPieCharts(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool):Void {
         for(node in nodes) {
+            if(node.node.names.length == 0) {
+                node.set_color("grey");
+                continue;
+            }
             node.set_pieByLst(l, ignoreCase, byIndNameOnly);
         }
     }
