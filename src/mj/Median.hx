@@ -41,7 +41,7 @@ class Median {
             }
             dist += w[pos];
         }
-        makesSense = dist < cDist;
+        makesSense = true; //dist < cDist;
     }
 
     private inline function continueMedians(l:List<Vector<String>>,c:String,pos:Int):Void {
@@ -49,7 +49,7 @@ class Median {
             e[pos] = c;
         }
     }
-    public inline function constructMedians():List<String> {
+    public inline function constructMediansOld():List<String> {
         // pre result calculations
         var presult:List<Vector<String>> = new List<Vector<String>>();
         presult.add(new Vector<String>(s1.length));
@@ -100,6 +100,43 @@ class Median {
             trace(r);
         }
         #end
+        return result;
+    }
+    public function constructMedians():List<String> {
+        if(meds <= 3) {
+            return constructMediansOld();
+        }
+        // only construct median vectors that "make sense"
+        // like Network
+        var s1v:Vector<String> = new Vector<String>(s1.length);
+        var s2v:Vector<String> = new Vector<String>(s1.length);
+        var s3v:Vector<String> = new Vector<String>(s1.length);
+        for(pos in 0...s1.length) {
+            if((s1.charAt(pos) == s2.charAt(pos) && s2.charAt(pos) == s3.charAt(pos)) || s1.charAt(pos) != s2.charAt(pos) && s2.charAt(pos) != s3.charAt(pos) && s1.charAt(pos) != s3.charAt(pos)) {
+                // all the same or all different
+                s1v[pos] = s1.charAt(pos);
+                s2v[pos] = s2.charAt(pos);
+                s3v[pos] = s3.charAt(pos);
+                continue;
+            }
+            // find majority
+            var c:String = "";
+            if(s1.charAt(pos) == s2.charAt(pos)) {
+                c = s1.charAt(pos);
+            } else if(s2.charAt(pos) == s3.charAt(pos)) {
+                c = s2.charAt(pos);
+            } else {
+                c = s3.charAt(pos);
+            }
+            // add
+            s1v[pos] = c;
+            s2v[pos] = c;
+            s3v[pos] = c;
+        }
+        var result:List<String> = new List<String>();
+        result.add(s1v.join(""));
+        result.add(s2v.join(""));
+        result.add(s3v.join(""));
         return result;
     }
 }
