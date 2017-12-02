@@ -356,9 +356,12 @@ class MJAlgo {
         while(s1 != null) {
             var s2_:Connection = s1.connectedTo;
             while(s2_ != null) {
+                var c12:Float = distStr(s1.redSeq, s2_.connectedTo.redSeq);
                 var s3_:Connection = s2_.next;
                 while(s3_ != null) {
-                    medLst.add(new Median(s1.redSeq, s2_.connectedTo.redSeq, s3_.connectedTo.redSeq, rweights));
+                    var c23:Float = distStr(s2_.connectedTo.redSeq, s3_.connectedTo.redSeq);
+                    var cDist:Float = c12 + c23;
+                    medLst.add(new Median(s1.redSeq, s2_.connectedTo.redSeq, s3_.connectedTo.redSeq, rweights, cDist));
                     s3_ = s3_.next;
                 }
                 s2_ = s2_.next;
@@ -411,7 +414,7 @@ class MJAlgo {
             #if asserts
             if(med.diffPos == 0) throw "WTF? No differntiating position found!";
             #end
-            if(med.diffPos >= 1 && med.dist <= lambda + epsilon) { // connection does not exceed lambda + epsilon (even if lambda not set ...)
+            if(med.makesSense && med.diffPos >= 1 && med.dist <= lambda + epsilon) { // connection does not exceed lambda + epsilon (even if lambda not set ...)
                 for(medV in med.constructMedians()) {
                     if(seqs.containsMed(medV)) continue; // do nothing if sequence is already in the set of sequences
                     lambda = Math.min(lambda, med.dist); // we found a sequence - so set new lamdba value

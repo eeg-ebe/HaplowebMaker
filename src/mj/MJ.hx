@@ -5,6 +5,10 @@ import util.Pair;
 import util.StdOutPrinter;
 import parsing.FastaParser;
 
+#if cpp
+import cpp.link.StaticStd;
+#end
+
 /**
  * This class is serving as an entry point for the program.
  */

@@ -14,10 +14,13 @@ class Median {
     public var diffPos:Int;
     public var meds:Int;
 
-    public inline function new(s1:String,s2:String,s3:String,w:Vector<Float>) {
+    public var makesSense:Bool;
+
+    public inline function new(s1:String,s2:String,s3:String,w:Vector<Float>, cDist:Float) {
         #if asserts
         if(s1.length != s2.length || s2.length != s3.length) throw "Sequences differ in length!";
         #end
+        makesSense = false;
         // save for later
         this.s1 = s1;
         this.s2 = s2;
@@ -38,6 +41,7 @@ class Median {
             }
             dist += w[pos];
         }
+        makesSense = dist < cDist;
     }
 
     private inline function continueMedians(l:List<Vector<String>>,c:String,pos:Int):Void {
