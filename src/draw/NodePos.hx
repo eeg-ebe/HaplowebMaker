@@ -131,7 +131,10 @@ if(colorName == null) {
         dashedArray = new List<Float>();
     }
 
-    public inline function getNodeSvg():String {
+    public inline function getNodeSvg(?drawMeds:Bool=true):String {
+        if(!drawMeds && node.type != SAMPLED_SEQUENCE) {
+            return "";
+        }
         if(valid) {
             return svg;
         }

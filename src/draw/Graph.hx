@@ -10,6 +10,7 @@ class Graph {
     public var links:List<Link>;
 
     public var drawCircles:Bool=true;
+    public var drawCirclesMedians:Bool=true;
     public var drawCons:Bool=true;
     public var drawCurves:Bool=true;
     public var drawBezierPoints:Bool=false;
@@ -445,7 +446,7 @@ class Graph {
         }
         if(drawCircles) {
             for(node in nodes) {
-                result.add(node.getNodeSvg());
+                result.add(node.getNodeSvg(drawCirclesMedians));
             }
         }
         if(drawAngles) {
