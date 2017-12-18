@@ -4,8 +4,14 @@ import parsing.Node;
 import util.Pair;
 import mj.Seq;
 
+enum SIZE_TO_RADIUS {
+    CONST;
+    SQRT;
+    LIN;
+}
+
 class NodePos {
-    public static var areaShouldBePropToNrInd:Bool = false;
+    public static var areaShouldBePropTo:SIZE_TO_RADIUS = SIZE_TO_RADIUS.SQRT;
 
     public var node(default,null):Node;
 
@@ -116,14 +122,17 @@ if(colorName == null) {
         valid = false;
         pie = new List<Pair<String,Int>>();
         this.node = n;
-        if(areaShouldBePropToNrInd) {
+        if(areaShouldBePropTo == SIZE_TO_RADIUS.CONST) {
+            this.radius = 15;
+        } else if(areaShouldBePropTo == SIZE_TO_RADIUS.SQRT) {
             this.radius = 3 + Math.sqrt(node.names.length);
-        } else {
+        } else if(areaShouldBePropTo == SIZE_TO_RADIUS.LIN) {
             this.radius = 3 + node.names.length;
         }
         if(this.node.type == MEDIAN_VECTOR) {
             this.strokeColor = "grey";
             this.strokeWidth = 1;
+            this.radius = 3;
         } else {
             this.strokeColor = "black";
             this.strokeWidth = 1;
