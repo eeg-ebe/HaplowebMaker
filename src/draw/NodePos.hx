@@ -12,6 +12,17 @@ enum SIZE_TO_RADIUS {
 
 class NodePos {
     public static var areaShouldBePropTo:SIZE_TO_RADIUS = SIZE_TO_RADIUS.SQRT;
+    public static inline function set_areaShouldBePropTo(s:String):Void {
+        if(s == "AREA") {
+            areaShouldBePropTo = SIZE_TO_RADIUS.SQRT;
+        } else if(s == "Const") {
+            areaShouldBePropTo = SIZE_TO_RADIUS.CONST;
+        } else if(s == "Radius") {
+            areaShouldBePropTo = SIZE_TO_RADIUS.LIN;
+        } else {
+            trace("Not understood!");
+        }
+    }
 
     public var node(default,null):Node;
 
@@ -123,10 +134,13 @@ if(colorName == null) {
         pie = new List<Pair<String,Int>>();
         this.node = n;
         if(areaShouldBePropTo == SIZE_TO_RADIUS.CONST) {
+trace("SIZE_TO_RADIUS.CONST");
             this.radius = 15;
         } else if(areaShouldBePropTo == SIZE_TO_RADIUS.SQRT) {
+trace("SIZE_TO_RADIUS.SQRT");
             this.radius = 3 + Math.sqrt(node.names.length);
         } else if(areaShouldBePropTo == SIZE_TO_RADIUS.LIN) {
+trace("SIZE_TO_RADIUS.LIN");
             this.radius = 3 + node.names.length;
         }
         if(this.node.type == MEDIAN_VECTOR) {
