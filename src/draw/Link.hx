@@ -9,6 +9,7 @@ class Link {
     public var w:Float;
 
     public var strokeColor:String;
+    public var strokeColorList:List<Pair<String,Float>> = null;
     public var strokeWidth:Float;
     public var dashedArray:List<Float>;
 
@@ -50,23 +51,43 @@ class Link {
 
     public inline function getLinkSvg():String {
         var result:List<String> = new List<String>();
-        result.add("<path d='M");
-        result.add(n1.xPos + " ");
-        result.add(n1.yPos + " Q");
-        result.add(" " + calcCPoint(n1.xPos, xPos, n2.xPos));
-        result.add(" " + calcCPoint(n1.yPos, yPos, n2.yPos));
-        result.add(" " + n2.xPos);
-        result.add(" " + n2.yPos);
-        result.add("' stroke='");
-        result.add(strokeColor);
-        result.add("' stroke-width='");
-        result.add(strokeWidth + "' ");
-        if(!this.dashedArray.isEmpty()) {
-            result.add("stroke-dasharray='");
-            result.add(this.dashedArray.join(","));
-            result.add("' ");
+        if(strokeColorList == null || strokeColorList.isEmpty()) {
+            result.add("<path d='M");
+            result.add(n1.xPos + " ");
+            result.add(n1.yPos + " Q");
+            result.add(" " + calcCPoint(n1.xPos, xPos, n2.xPos));
+            result.add(" " + calcCPoint(n1.yPos, yPos, n2.yPos));
+            result.add(" " + n2.xPos);
+            result.add(" " + n2.yPos);
+            result.add("' stroke='");
+            result.add(strokeColor);
+            result.add("' stroke-width='");
+            result.add(strokeWidth + "' ");
+            if(!this.dashedArray.isEmpty()) {
+                result.add("stroke-dasharray='");
+                result.add(this.dashedArray.join(","));
+                result.add("' ");
+            }
+            result.add("/>");
+        } else {
+            var b00X:Float = -2 * (xPos - n1.xPos);
+            var b00Y:Float = -2 * (yPos - n1.yPos);
+            var b05X:Float = (xPos - n1.xPos) + (n2.xPos - xPos);
+            var b05Y:Float = (xPos - n1.xPos) + (n2.yPos - yPos);
+            var b10X:Float = 2 * (n2.xPos - xPos);
+            var b10Y:Float = 2 * (n2.yPos - yPos);
+            var v00X:Float = b00Y;
+            var v00Y:Float = -b00X;
+            var v05X:Float = b05Y;
+            var v05Y:Float = -b05X;
+            var v10X:Float = b10Y;
+            var v10Y:Float = -b10X;
+            for(p in strokeColorList) {
+                var c:String = p.first;
+                var d:Float = p.second;
+                
+            }
         }
-        result.add("/>");
         return result.join("");
     }
 

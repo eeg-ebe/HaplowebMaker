@@ -79,7 +79,7 @@ class NodePos {
         l.add(new Pair<String,Int>(s, 1));
         this.set_pie(l);
     }
-    public inline function set_pieByLst(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool):Void {
+    public inline function set_pieByLst(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool, byRegEx:Bool):Void {
         var l_:List<Pair<String,Int>> = new List<Pair<String,Int>>();
         for(name in node.names) {
             if(byIndNameOnly) {

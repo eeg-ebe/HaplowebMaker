@@ -156,13 +156,21 @@ class Graph {
     public inline function assingPiesByTxt(s:String, ignoreCase:Bool, byIndNameOnly:Bool):Void {
         assignPieCharts(LstParser.parseLst(s), ignoreCase, byIndNameOnly);
     }
-    public inline function assignPieCharts(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool):Void {
+    public inline function assignPieCharts(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool, byRegEx:Bool):Void {
         for(node in nodes) {
             if(node.node.names.length == 0) {
                 node.set_color("grey");
                 continue;
             }
-            node.set_pieByLst(l, ignoreCase, byIndNameOnly);
+            node.set_pieByLst(l, ignoreCase, byIndNameOnly, byRegEx);
+        }
+    }
+    public function initStrokeColorList():Void {
+        // TODO XXX
+        var count:Float = 0;
+        var map:StringMap<Float> = new StringMap<Float>();
+        for(con in cons) {
+            
         }
     }
     public static inline function generateRandomHex():String {
@@ -857,6 +865,23 @@ class Graph {
         }
     }
 
+    public function resetLinkColors(color:String):Void {
+        for(l in links) {
+            l.strokeColor = color;
+        }
+    }
+/*
+    public function clusteredColors():Void {//TODO
+        for(l in links) {
+            l.strokeColor = l.n1;
+        }
+    }
+    public function clusteredColors():Void {//TODO
+        for(l in links) {
+            l.strokeColor = l.n1;
+        }
+    }
+*/
 // TODO:
 //   - pca
 //   - dot output and graphviz txt output parsing
