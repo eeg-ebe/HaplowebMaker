@@ -50,16 +50,16 @@ class CoMa {
         return "rgb(" + Std.int(r) + "," + Std.int(g) + "," + Std.int(b) + ")";
     }
 
-    public static function runComaJS(a:Array<String>, printer:Printer, printer2:Printer, printer3:Printer):Void {
+    public static function runComaJS(a:Array<String>, printer:Printer, printer2:Printer, printer3:Printer, namesOfMarkerFiles:Array<String>):Void {
         var l:List<List<Pair<String, String>>> = new List<List<Pair<String, String>>>();
         for(i in 0...a.length) {
             l.add(LstParser.parseLst(a[i]));
         }
-        runComa(l, printer, printer2, printer3);
+        runComa(l, printer, printer2, printer3, namesOfMarkerFiles);
     }
 
     // printer3: partitions
-    public static function runComa(l:List<List<Pair<String, String>>>, printer:Printer, printer2:Printer, printer3:Printer):Void {
+    public static function runComa(l:List<List<Pair<String, String>>>, printer:Printer, printer2:Printer, printer3:Printer, namesOfMarkerFiles:Array<String>):Void {
 trace("runningComa on " + l.length + " " + l.first().length);
         // 1. Step Table
         var comaIndL:List<CoMaInd> = new List<CoMaInd>();
@@ -83,8 +83,9 @@ trace("runningComa on " + l.length + " " + l.first().length);
             index++;
         }
         printer3.printString("Individual");
-        for(i in 1...comaIndL.first().vals.length+1) {
-            printer3.printString("\tMarker" + i);
+        for(i in 0...comaIndL.first().vals.length) {
+            printer3.printString("\t");
+            printer3.printString(namesOfMarkerFiles[i]);
         }
         printer3.printString("\n");
         for(ind in comaIndL) {
