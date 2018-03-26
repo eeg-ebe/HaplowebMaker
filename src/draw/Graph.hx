@@ -3,6 +3,7 @@ package draw;
 import parsing.Node;
 import parsing.LstParser;
 import util.Pair;
+import mj.Seq;
 
 class Graph {
     public var nodes:List<NodePos>;
@@ -156,21 +157,32 @@ class Graph {
     public inline function assingPiesByTxt(s:String, ignoreCase:Bool, byIndNameOnly:Bool):Void {
         assignPieCharts(LstParser.parseLst(s), ignoreCase, byIndNameOnly);
     }
-    public inline function assignPieCharts(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool, byRegEx:Bool):Void {
+    public inline function assignPieCharts(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool/*, byRegEx:Bool*/):Void {
         for(node in nodes) {
             if(node.node.names.length == 0) {
                 node.set_color("grey");
                 continue;
             }
-            node.set_pieByLst(l, ignoreCase, byIndNameOnly, byRegEx);
+            node.set_pieByLst(l, ignoreCase, byIndNameOnly/*, byRegEx*/);
         }
     }
-    public function initStrokeColorList():Void {
-        // TODO XXX
-        var count:Float = 0;
-        var map:StringMap<Float> = new StringMap<Float>();
-        for(con in cons) {
-            
+    public function initStrokeColorList(l:List<Pair<String,String>>, ignoreCase:Bool):Void {
+        for(link in links) {
+            // get the color of the connections
+            /*
+            var map:StringMap<Int> = new StringMap<Int>();
+            for(name1 in link.n1.node.names) {
+                var nn1:String = Seq.getIndIdentifier(name1);
+                for(name2 in link.n1.node.names) {
+                    var nn2:String = Seq.getIndIdentifier(name2);
+                }
+            }
+            */
+            // init connection by colors
+            link.strokeColorList = new List<Pair<String,Int>>();
+            link.strokeColorList.add(new Pair("green", 5));
+            link.strokeColorList.add(new Pair("red", 18));
+            link.strokeColorList.add(new Pair("blue", 8));
         }
     }
     public static inline function generateRandomHex():String {

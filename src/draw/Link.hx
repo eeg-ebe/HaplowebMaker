@@ -9,7 +9,7 @@ class Link {
     public var w:Float;
 
     public var strokeColor:String;
-    public var strokeColorList:List<Pair<String,Float>> = null;
+    public var strokeColorList:List<Pair<String,Int>> = null;
     public var strokeWidth:Float;
     public var dashedArray:List<Float>;
 
@@ -67,25 +67,59 @@ class Link {
                 result.add("stroke-dasharray='");
                 result.add(this.dashedArray.join(","));
                 result.add("' ");
-            }
+            }   
             result.add("/>");
         } else {
             var b00X:Float = -2 * (xPos - n1.xPos);
             var b00Y:Float = -2 * (yPos - n1.yPos);
-            var b05X:Float = (xPos - n1.xPos) + (n2.xPos - xPos);
-            var b05Y:Float = (xPos - n1.xPos) + (n2.yPos - yPos);
-            var b10X:Float = 2 * (n2.xPos - xPos);
-            var b10Y:Float = 2 * (n2.yPos - yPos);
+            var b10X:Float = -2 * (n2.xPos - xPos);
+            var b10Y:Float = -2 * (n2.yPos - yPos);
+            var b05X:Float = b00X + b10X;
+            var b05Y:Float = b00Y + b10Y;
             var v00X:Float = b00Y;
             var v00Y:Float = -b00X;
-            var v05X:Float = b05Y;
-            var v05Y:Float = -b05X;
+            var l00:Float = Math.sqrt(v00X * v00X + v00Y * v00Y);
+            v00X = v00X / l00;
+            v00Y = v00Y / l00;
             var v10X:Float = b10Y;
             var v10Y:Float = -b10X;
+            var l10:Float = Math.sqrt(v10X * v10X + v10Y * v10Y);
+            v10X = v10X / l10;
+            v10Y = v10Y / l10;
+            var v05X:Float = b05Y;
+            var v05Y:Float = -b05X;
+            var l05:Float = Math.sqrt(v05X * v05X + v05Y * v05Y);
+            v05X = v05X / l05;
+            v05Y = v05Y / l05;
+            // thickness
+            var sum:Int = 0;
+            for(p in strokeColorList) {
+                sum += p.second;
+            }
+            // draw
+            var dSum:Int = 0;
             for(p in strokeColorList) {
                 var c:String = p.first;
-                var d:Float = p.second;
-                
+                var d:Int = p.second;
+                var l:Float = (sum - d) / 2 - dSum;
+                dSum += d;
+                result.add("<path d='M");
+                result.add((n1.xPos + v00X * l) + " ");
+                result.add((n1.yPos + v00Y * l) + " Q");
+                result.add(" " + calcCPoint((n1.xPos + v00X * l), (xPos + v05X * l), (n2.xPos + v10X * l)));
+                result.add(" " + calcCPoint((n1.yPos + v00Y * l), (yPos + v05Y * l), (n2.yPos + v10Y * l)));
+                result.add(" " + (n2.xPos + v10X * l));
+                result.add(" " + (n2.yPos + v10Y * l));
+                result.add("' stroke='");
+                result.add(c);
+                result.add("' stroke-width='");
+                result.add(d + "' ");
+                if(!this.dashedArray.isEmpty()) {
+                    result.add("stroke-dasharray='");
+                    result.add(this.dashedArray.join(","));
+                    result.add("' ");
+                }
+                result.add("/>");
             }
         }
         return result.join("");
