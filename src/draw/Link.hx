@@ -98,10 +98,11 @@ class Link {
             }
             // draw
             var dSum:Int = 0;
+            var factor:Float = (strokeWidth / sum);
             for(p in strokeColorList) {
                 var c:String = p.first;
                 var d:Int = p.second;
-                var l:Float = (sum - d) / 2 - dSum;
+                var l:Float = ((sum - d) / 2 - dSum) * factor;
                 dSum += d;
                 result.add("<path d='M");
                 result.add((n1.xPos + v00X * l) + " ");
@@ -113,7 +114,7 @@ class Link {
                 result.add("' stroke='");
                 result.add(c);
                 result.add("' stroke-width='");
-                result.add(d + "' ");
+                result.add((d * factor) + "' ");
                 if(!this.dashedArray.isEmpty()) {
                     result.add("stroke-dasharray='");
                     result.add(this.dashedArray.join(","));

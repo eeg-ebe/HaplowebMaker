@@ -12,7 +12,7 @@ class Graph {
     public var links:List<Link>;
 
     public var drawCircles:Bool=true;
-    public var drawCirclesMedians:Bool=true;
+    public var drawCirclesMedians:Bool=false;
     public var drawCons:Bool=true;
     public var drawCurves:Bool=true;
     public var drawBezierPoints:Bool=false;
