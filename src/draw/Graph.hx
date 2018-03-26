@@ -12,6 +12,7 @@ class Graph {
     public var links:List<Link>;
 
     public var drawCircles:Bool=true;
+    public var drawCirclesNames:Bool=false;
     public var drawCirclesMedians:Bool=false;
     public var drawCons:Bool=true;
     public var drawCurves:Bool=true;
@@ -24,6 +25,8 @@ class Graph {
     public inline function new(l:List<Node>) {
         // assign default drawing
         drawCircles=true;
+        drawCirclesNames=false;
+        drawCirclesMedians=false;
         drawCons=true;
         drawCurves=true; 
         drawBezierPoints=false;
@@ -492,6 +495,11 @@ class Graph {
         if(drawCircles) {
             for(node in nodes) {
                 result.add(node.getNodeSvg(drawCirclesMedians));
+            }
+        }
+        if(drawCirclesNames) {
+            for(node in nodes) {
+                result.add(node.getNodeNameSvg());
             }
         }
         if(drawAngles) {

@@ -226,6 +226,14 @@ trace("SIZE_TO_RADIUS.LIN");
         valid = true;
         return svg;
     }
+    public inline function getNodeNameSvg() {
+        if(node.type != SAMPLED_SEQUENCE) {
+            return "";
+        }
+        var x:Float = this.xPos + this.radius + 5;
+        var y:Float = this.yPos + this.radius + 5;
+        return "<text x='" + x + "' y='" + y + "'>" + node.names.first() + "</text>";
+    }
 
     public inline function minX():Float {
         return xPos - radius;
