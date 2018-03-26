@@ -4,6 +4,7 @@ import parsing.Node;
 import parsing.LstParser;
 import util.Pair;
 import mj.Seq;
+import haxe.ds.StringMap;
 
 class Graph {
     public var nodes:List<NodePos>;
@@ -168,21 +169,42 @@ class Graph {
     }
     public function initStrokeColorList(l:List<Pair<String,String>>, ignoreCase:Bool):Void {
         for(link in links) {
-            // get the color of the connections
-            /*
+            // get the ind. present in both
             var map:StringMap<Int> = new StringMap<Int>();
             for(name1 in link.n1.node.names) {
                 var nn1:String = Seq.getIndIdentifier(name1);
                 for(name2 in link.n1.node.names) {
                     var nn2:String = Seq.getIndIdentifier(name2);
+                    if(nn1 == nn2) {
+                        var colorName:String = null;
+                        if(ignoreCase) {
+                            for(p in l) {
+                                if(p.first.toUpperCase() == nn1.toUpperCase()) {
+                                    colorName = p.second.toLowerCase();
+                                    break;
+                                }
+                            }
+                        } else {
+                            for(p in l) {
+                                if(p.first == nn1) {
+                                    colorName = p.second.toLowerCase();
+                                    break;
+                                }
+                            }
+                        }
+                        if(map.exists(colorName)) {
+                            map.set(colorName, map.get(colorName) + 1);
+                        } else {
+                            map.set(colorName, 1);
+                        }
+                    }
                 }
             }
-            */
             // init connection by colors
             link.strokeColorList = new List<Pair<String,Int>>();
-            link.strokeColorList.add(new Pair("green", 5));
-            link.strokeColorList.add(new Pair("red", 18));
-            link.strokeColorList.add(new Pair("blue", 8));
+            for(key in map.keys()) {
+                link.strokeColorList.add(new Pair(key, map.get(key)));
+            }
         }
     }
     public static inline function generateRandomHex():String {
