@@ -50,15 +50,16 @@ class CoMa {
         return "rgb(" + Std.int(r) + "," + Std.int(g) + "," + Std.int(b) + ")";
     }
 
-    public static function runComaJS(a:Array<String>, printer:Printer, printer2:Printer):Void {
+    public static function runComaJS(a:Array<String>, printer:Printer, printer2:Printer, printer3:Printer):Void {
         var l:List<List<Pair<String, String>>> = new List<List<Pair<String, String>>>();
         for(i in 0...a.length) {
             l.add(LstParser.parseLst(a[i]));
         }
-        runComa(l, printer, printer2);
+        runComa(l, printer, printer2, printer3);
     }
 
-    public static function runComa(l:List<List<Pair<String, String>>>, printer:Printer, printer2:Printer):Void {
+    // printer3: partitions
+    public static function runComa(l:List<List<Pair<String, String>>>, printer:Printer, printer2:Printer, printer3:Printer):Void {
 trace("runningComa on " + l.length + " " + l.first().length);
         // 1. Step Table
         var comaIndL:List<CoMaInd> = new List<CoMaInd>();
@@ -80,6 +81,13 @@ trace("runningComa on " + l.length + " " + l.first().length);
                 }
             }
             index++;
+        }
+        for(ind in comaIndL) {
+            printer3.printString(ind.indName);
+            for(val in ind.vals) {
+                printer3.printString("\t" + val);
+            }
+            printer3.printString("\n");
         }
         // 2. Step Cluster
         var orderedL:List<CoMaInd> = new List<CoMaInd>();
@@ -189,6 +197,8 @@ trace("runningComa on " + l.length + " " + l.first().length);
         // end matrix
         printer.printString("</svg>");
         printer.close();
+        printer2.close();
+        printer3.close();
     }
 
     public static function main():Void {
