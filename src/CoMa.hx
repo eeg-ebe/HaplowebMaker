@@ -82,6 +82,11 @@ trace("runningComa on " + l.length + " " + l.first().length);
             }
             index++;
         }
+        printer3.printString("Individual");
+        for(i in 1...comaIndL.first().vals.length+1) {
+            printer3.printString("\tMarker" + i);
+        }
+        printer3.printString("\n");
         for(ind in comaIndL) {
             printer3.printString(ind.indName);
             for(val in ind.vals) {
