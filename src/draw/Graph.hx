@@ -167,6 +167,9 @@ class Graph {
             node.set_pieByLst(l, ignoreCase, byIndNameOnly/*, byRegEx*/);
         }
     }
+    public function initStrokeColorListByStr(s:String, ignoreCase:Bool):Void {
+        initStrokeColorList(LstParser.parseLst(s), ignoreCase);
+    }
     public function initStrokeColorList(l:List<Pair<String,String>>, ignoreCase:Bool):Void {
         for(link in links) {
             // get the ind. present in both
