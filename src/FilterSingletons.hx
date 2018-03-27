@@ -9,7 +9,7 @@ class FilterSingletons {
                 map.get(seq.second).add(seq.first);
             } else {
                 var lst:List<String> = new List<String>();
-                lst.add(seq.second);
+                lst.add(seq.first);
                 map.set(seq.second, lst);
             }
         }
