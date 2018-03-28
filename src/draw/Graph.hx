@@ -179,7 +179,7 @@ class Graph {
             var map:StringMap<Int> = new StringMap<Int>();
             for(name1 in link.n1.node.names) {
                 var nn1:String = Seq.getIndIdentifier(name1);
-                for(name2 in link.n1.node.names) {
+                for(name2 in link.n2.node.names) {
                     var nn2:String = Seq.getIndIdentifier(name2);
                     if(nn1 == nn2) {
                         var colorName:String = null;
