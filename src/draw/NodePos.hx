@@ -134,13 +134,10 @@ if(colorName == null) {
         pie = new List<Pair<String,Int>>();
         this.node = n;
         if(areaShouldBePropTo == SIZE_TO_RADIUS.CONST) {
-trace("SIZE_TO_RADIUS.CONST");
             this.radius = 15;
         } else if(areaShouldBePropTo == SIZE_TO_RADIUS.SQRT) {
-trace("SIZE_TO_RADIUS.SQRT");
             this.radius = 3 + Math.sqrt(node.names.length);
         } else if(areaShouldBePropTo == SIZE_TO_RADIUS.LIN) {
-trace("SIZE_TO_RADIUS.LIN");
             this.radius = 3 + node.names.length;
         }
         if(this.node.type == MEDIAN_VECTOR) {
