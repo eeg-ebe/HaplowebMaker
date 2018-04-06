@@ -1,6 +1,8 @@
 import parsing.LstParser;
 import util.Pair;
 import interfaces.Printer;
+import util.StdOutPrinter;
+import util.NullPrinter;
 
 /*
 Input of CoMa
@@ -60,7 +62,6 @@ class CoMa {
 
     // printer3: partitions
     public static function runComa(l:List<List<Pair<String, String>>>, printer:Printer, printer2:Printer, printer3:Printer, namesOfMarkerFiles:Array<String>):Void {
-trace("runningComa on " + l.length + " " + l.first().length);
         // 1. Step Table
         var comaIndL:List<CoMaInd> = new List<CoMaInd>();
         var index:Int = 0;
@@ -95,6 +96,10 @@ trace("runningComa on " + l.length + " " + l.first().length);
             }
             printer3.printString("\n");
         }
+        printer3.close();
+        runComaFromPartition(comaIndL, printer, printer2);
+    }
+    public static function runComaFromPartition(comaIndL:List<CoMaInd>, printer:Printer, printer2:Printer):Void {
         // 2. Step Cluster
         var orderedL:List<CoMaInd> = new List<CoMaInd>();
         var highestVal:Float = Math.NEGATIVE_INFINITY;
@@ -204,10 +209,35 @@ trace("runningComa on " + l.length + " " + l.first().length);
         printer.printString("</svg>");
         printer.close();
         printer2.close();
-        printer3.close();
+    }
+
+    public static function parsePartitionFile(fileContent:String):List<CoMaInd> {
+        var comaIndL:List<CoMaInd> = new List<CoMaInd>();
+        var lines:Array<String> = fileContent.split("\n");
+        var lineNo:Int = 0;
+        for(line in lines) {
+            lineNo++;
+            var parts:Array<String> = line.split("\t");
+            if(line == null || line == "" || (lineNo == 1)) {
+                continue;
+            }
+            var newCoMaInd:CoMaInd = new CoMaInd(parts[0], parts.length-1);
+            for(index in 1...parts.length) {
+                newCoMaInd.setSpResultOf(index-1, Std.parseInt(parts[index]));
+            }
+            comaIndL.add(newCoMaInd);
+        }
+        return comaIndL;
     }
 
     public static function main():Void {
-
+#if sys
+        var myArgs:Array<String> = Sys.args();
+        var fileContent = sys.io.File.getContent(myArgs[0]);
+        var comaIndL:List<CoMaInd> = parsePartitionFile(fileContent);
+        var printer2:NullPrinter = new NullPrinter();
+        var printer:StdOutPrinter = new StdOutPrinter();
+        runComaFromPartition(comaIndL, printer, printer2);
+#end
     }
 }
