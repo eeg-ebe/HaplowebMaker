@@ -449,6 +449,9 @@ class Graph {
         var minX:Float = Math.POSITIVE_INFINITY;
         var minY:Float = Math.POSITIVE_INFINITY;
         for(node in nodes) {
+            if(drawCirclesNames) {
+                // XXX: Take name length into account
+            }
             maxX = Math.max(maxX, node.maxX());
             maxY = Math.max(maxY, node.maxY());
             minX = Math.min(minX, node.minX());

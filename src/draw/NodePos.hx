@@ -250,11 +250,11 @@ if(colorName == null) {
         var result:String = "<table style='width:100%'>";
         result += "<tr><td>Id</td><td>" + this.node.id + "</td></tr>";
         result += "<tr><td>SpId</td><td>" + this.node.spId + "</td></tr>";
-        result += "<tr><td>Seq</td><td>" + this.node.seq + "</td></tr>";
-        result += "<tr><td>Names</td><td>" + this.node.names.join(";") + "</td></tr>";
-        result += "<tr><td>xPos</td><td>" + this.xPos + "</td></tr>";
-        result += "<tr><td>yPos</td><td>" + this.yPos + "</td></tr>";
-        result += "<tr><td>radius</td><td>" + this.radius + "</td></tr>";
+//        result += "<tr><td>Seq</td><td>" + this.node.seq + "</td></tr>";
+        result += "<tr><td>Names</td><td>" + this.node.names.join("; ") + "</td></tr>";
+//        result += "<tr><td>xPos</td><td>" + this.xPos + "</td></tr>";
+//        result += "<tr><td>yPos</td><td>" + this.yPos + "</td></tr>";
+//        result += "<tr><td>radius</td><td>" + this.radius + "</td></tr>";
         result += "</table>";
         return result;
     }
