@@ -71,19 +71,22 @@ class MJAlgo {
         #end
     }
 
-    public inline function runMJ(epsilon:Float):Void {
+    public inline function runMJ(epsilon:Float, ?onlyMinimumSpanning:Bool=false):Void {
         if(seqs.size > 1) { // need at least one sequence
             var i:Int;
             do {
                 step1();
                 step2(epsilon);
+                if(onlyMinimumSpanning) {
+                    return;
+                }
                 i = step3();
                 if(i != 0) {
                     continue;
                 }
                 i = step4(epsilon);
         } while(i != 0);
-        step5();
+            step5();
         }
     }
 
