@@ -97,9 +97,12 @@ class CoMa {
             printer3.printString("\n");
         }
         printer3.close();
-        runComaFromPartition(comaIndL, printer, printer2);
+        runComaFromPartition(new Pair<List<CoMaInd>, Null<Array<Int>>>(comaIndL, null), printer, printer2);
     }
-    public static function runComaFromPartition(comaIndL:List<CoMaInd>, printer:Printer, printer2:Printer):Void {
+    public static function runComaFromPartition(comaIndLP:Pair<List<CoMaInd>, Null<Array<Int>>>, printer:Printer, printer2:Printer):Void {
+        // xxx
+        var comaIndL:List<CoMaInd> = comaIndLP.first;
+        var weights:Null<Array<Int>> = comaIndLP.second;
         // 2. Step Cluster
         var orderedL:List<CoMaInd> = new List<CoMaInd>();
         var highestVal:Float = Math.NEGATIVE_INFINITY;
@@ -114,7 +117,7 @@ class CoMa {
         } else if(comaIndL.length == 2) {
             orderedL.add(comaIndL.pop());
             orderedL.add(comaIndL.pop());
-            highestVal = orderedL.first().compare(orderedL.last());
+            highestVal = orderedL.first().compare(orderedL.last(), weights);
             lowestVal = highestVal;
         } else {
             // get the pair of elements that is nearest
@@ -123,7 +126,7 @@ class CoMa {
             var bestE2:CoMaInd = null;
             for(e1 in comaIndL) {
                 for(e2 in comaIndL) {
-                    var dist:Float = e1.compare(e2);
+                    var dist:Float = e1.compare(e2, weights);
                     if(e1 != e2) {
                         if(dist > bestDist) {
                             bestDist = dist;
@@ -146,8 +149,8 @@ class CoMa {
                 var bestEFirst:CoMaInd = null;
                 var bestELast:CoMaInd = null;
                 for(e in comaIndL) {
-                    var distFirst:Float = e.compare(orderedL.first());
-                    var distLast:Float = e.compare(orderedL.last());
+                    var distFirst:Float = e.compare(orderedL.first(), weights);
+                    var distLast:Float = e.compare(orderedL.last(), weights);
                     if(distFirst > bestDistFirst) {
                         bestDistFirst = distFirst;
                         bestEFirst = e;
@@ -174,7 +177,7 @@ class CoMa {
         for(e1 in orderedL) {
             printer2.printString(e1.indName);
             for(e2 in orderedL) {
-                var dist:Float = e1.compare(e2);
+                var dist:Float = e1.compare(e2, weights);
                 printer2.printString("\t" + dist);
             }
             printer2.printString("\n");
@@ -198,7 +201,7 @@ class CoMa {
         var j:Int = 0;
         for(e1 in orderedL) {
             for(e2 in orderedL) {
-                var dist:Float = e1.compare(e2);
+                var dist:Float = e1.compare(e2, weights);
                 printer.printString("<rect x=\"" + (100 + 20 * i) + "\" y=\"" + (100 + 20 * j) + "\" width=\"20\" height=\"20\" fill=\"" + cToCol(dist, highestVal, lowestVal) + "\"/>");
                 j++;
             }
@@ -211,14 +214,22 @@ class CoMa {
         printer2.close();
     }
 
-    public static function parsePartitionFile(fileContent:String):List<CoMaInd> {
+    public static function parsePartitionFile(fileContent:String):Pair<List<CoMaInd>, Null<Array<Int>>> {
         var comaIndL:List<CoMaInd> = new List<CoMaInd>();
-        var lines:Array<String> = fileContent.split("\n");
+        var lines:Array<String> = StringTools.rtrim(fileContent).split("\n");
         var lineNo:Int = 0;
+        var weightLine:Array<Int> = null;
         for(line in lines) {
             lineNo++;
             var parts:Array<String> = line.split("\t");
             if(line == null || line == "" || (lineNo == 1)) {
+                continue;
+            }
+            if(lineNo == lines.length && (parts[0] == "" || parts[0] == null)) {
+                weightLine = new Array<Int>();
+                for(index in 1...parts.length) {
+                    weightLine.push(Std.parseInt(parts[index]));
+                }
                 continue;
             }
             var newCoMaInd:CoMaInd = new CoMaInd(parts[0], parts.length-1);
@@ -227,7 +238,7 @@ class CoMa {
             }
             comaIndL.add(newCoMaInd);
         }
-        return comaIndL;
+        return new Pair<List<CoMaInd>, Null<Array<Int>>>(comaIndL, weightLine);
     }
 
     public static function main():Void {
@@ -237,7 +248,7 @@ class CoMa {
             trace("Please specify at least one file");
         } else if(myArgs.length == 1) {
             var fileContent = sys.io.File.getContent(myArgs[0]);
-            var comaIndL:List<CoMaInd> = parsePartitionFile(fileContent);
+            var comaIndL:Pair<List<CoMaInd>, Null<Array<Int>>> = parsePartitionFile(fileContent);
             var printer2:NullPrinter = new NullPrinter();
             var printer:StdOutPrinter = new StdOutPrinter();
             runComaFromPartition(comaIndL, printer, printer2);

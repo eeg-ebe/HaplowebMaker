@@ -17,16 +17,25 @@ class CoMaInd {
         vals[i] = sp;
     }
 
-    public function compare(other:CoMaInd):Float {
+    public function compare(other:CoMaInd, weights:Null<Array<Int>>):Float {
         var result:Float = 0;
         for(i in 0...vals.length) {
+            //trace(vals.length + " " + weights.length);
             if(vals[i] == -1 || other.vals[i] == -1) {
                 continue;
             }
             if(vals[i] == other.vals[i]) {
-                result++;
+                if(weights == null) {
+                    result++;
+                } else {
+                    result += weights[i];
+                }
             } else {
-                result--;
+                if(weights == null) {
+                    result--;
+                } else {
+                    result -= weights[i];
+                }
             }
         }
         return result;
