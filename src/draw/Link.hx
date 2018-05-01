@@ -35,9 +35,16 @@ class Link {
     public inline function new(n1:NodePos,n2:NodePos,w:Float) {
         this.n1 = n1;
         this.n2 = n2;
-        this.w = w;
+        if(NodePos.areaShouldBePropTo == NodePos.SIZE_TO_RADIUS.CONST) {
+            // = 1 may not be "that" visible (after all each circle has a radius of 15)
+            // and the user can inc/dec the radius ... so use = 5
+            this.w = 5;
+            this.strokeWidth = 5;
+        } else {
+            this.w = w;
+            this.strokeWidth = w;
+        }
         this.strokeColor = "blue";
-        this.strokeWidth = w;
         this.dashedArray = new List<Float>();
         this.setByUser = false;
     }
