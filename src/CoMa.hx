@@ -233,11 +233,38 @@ class CoMa {
     public static function main():Void {
 #if sys
         var myArgs:Array<String> = Sys.args();
-        var fileContent = sys.io.File.getContent(myArgs[0]);
-        var comaIndL:List<CoMaInd> = parsePartitionFile(fileContent);
-        var printer2:NullPrinter = new NullPrinter();
-        var printer:StdOutPrinter = new StdOutPrinter();
-        runComaFromPartition(comaIndL, printer, printer2);
+        if(myArgs.length == 0) {
+            trace("Please specify at least one file");
+        } else if(myArgs.length == 1) {
+            var fileContent = sys.io.File.getContent(myArgs[0]);
+            var comaIndL:List<CoMaInd> = parsePartitionFile(fileContent);
+            var printer2:NullPrinter = new NullPrinter();
+            var printer:StdOutPrinter = new StdOutPrinter();
+            runComaFromPartition(comaIndL, printer, printer2);
+        } else {
+            var l:List<List<Pair<String, String>>> = new List<List<Pair<String, String>>>();
+            var namesOfMarkerFiles:Array<String> = new Array<String>();
+            for(i in 0...myArgs.length) {
+                var fileContent:String = sys.io.File.getContent(myArgs[i]);
+                var listOfPairs:List<Pair<String, String>> = new List<Pair<String, String>>();
+                var lines:Array<String> = fileContent.split("\n");
+                var lineNo:Int = 0;
+                for(line in lines) {
+                    lineNo++;
+                    var parts:Array<String> = line.split("\t");
+                    if(line == null || line == "") {
+                        continue;
+                    }
+                    listOfPairs.add(new Pair(parts[0], parts[1]));
+                }
+                l.add(listOfPairs);
+                namesOfMarkerFiles.push(""); // not taken into account anyway (till now at least - printer3 is a NullPrinter). Implement a basename function and replace with basename(myArgs[i]) if needed
+            }
+            var printer2:NullPrinter = new NullPrinter();
+            var printer3:NullPrinter = new NullPrinter();
+            var printer:StdOutPrinter = new StdOutPrinter();
+            runComa(l, printer, printer2, printer3, namesOfMarkerFiles);
+        }
 #end
     }
 }
