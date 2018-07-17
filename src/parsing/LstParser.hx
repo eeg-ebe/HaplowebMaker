@@ -9,7 +9,7 @@ class LstParser {
         var lineNo:Int = 0;
         for(line in lines) {
             lineNo++;
-            if(line == null || line == "" || line.charAt(0) == "#") {
+            if(line == null || Parse.stripString(line) == "" || line.charAt(0) == "#") {
                 continue;
             }
             var pos:Int = line.lastIndexOf("\t");
