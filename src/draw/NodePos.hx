@@ -1,5 +1,6 @@
 package draw;
 
+import haxe.ds.StringMap;
 import parsing.Node;
 import util.Pair;
 import mj.Seq;
@@ -222,6 +223,35 @@ if(colorName == null) {
         svg = result.join("");
         valid = true;
         return svg;
+    }
+    public inline function getLoopSvg():String {
+        var n:Int = 0;
+        var map:StringMap<Int> = new StringMap<Int>();
+        for(name in this.node.names) {
+            var indName:String = Seq.getIndIdentifier(name);
+            if(map.exists(indName)) {
+                if(map.get(indName) == 0) {
+                    map.set(indName, 1);
+                    n++;
+                }
+            } else {
+                map.set(indName, 0);
+            }
+        }trace("XXX " + n + " " + xPos + " " + yPos);
+        if(n == 0) {
+            return "";
+        }
+        var l:Float = Math.sqrt(this.xPos * this.xPos + this.yPos * this.yPos);
+        var x:Float;
+        var y:Float;
+        if(l < 0.1) {
+            x = this.xPos + this.radius / 1.414213562;
+            y = this.yPos + this.radius / 1.414213562;
+        } else {
+            x = this.xPos + (this.xPos / l) * this.radius;
+            y = this.yPos + (this.yPos / l) * this.radius;
+        }
+        return "<circle cx='" + x + "' cy='" + y + "' r='" + this.radius + "' stroke-width='" + n + "' stroke='blue' fill='none'/>";
     }
     public inline function getNodeNameSvg() {
         if(node.type != SAMPLED_SEQUENCE) {

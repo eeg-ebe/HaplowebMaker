@@ -16,6 +16,7 @@ class Graph {
     public var drawCirclesMedians:Bool=false;
     public var drawCons:Bool=true;
     public var drawCurves:Bool=true;
+    public var drawLoops:Bool=false;
     public var drawBezierPoints:Bool=false;
     public var drawCenter:Bool=false;
     public var drawAngles:Bool=false;
@@ -28,7 +29,8 @@ class Graph {
         drawCirclesNames=false;
         drawCirclesMedians=false;
         drawCons=true;
-        drawCurves=true; 
+        drawCurves=true;
+        drawLoops=false;
         drawBezierPoints=false;
         drawCenter=false;
         drawAngles=false;
@@ -494,6 +496,11 @@ class Graph {
                 result.add(link.getLinkSvg());
             }
             result.add("</g>");
+        }
+        if(drawLoops) {
+            for(node in nodes) {
+                result.add(node.getLoopSvg());
+            }
         }
         if(drawCircles) {
             for(node in nodes) {
