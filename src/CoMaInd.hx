@@ -17,7 +17,7 @@ class CoMaInd {
         vals[i] = sp;
     }
 
-    public function compare(other:CoMaInd, weights:Null<Array<Int>>):Float {
+    public function compare(other:CoMaInd, weights:Null<Array<Int>>, compStrategy:Int):Float {
         var result:Float = 0;
         for(i in 0...vals.length) {
             //trace(vals.length + " " + weights.length);
@@ -31,10 +31,12 @@ class CoMaInd {
                     result += weights[i];
                 }
             } else {
-                if(weights == null) {
-                    result--;
-                } else {
-                    result -= weights[i];
+                if(compStrategy == 0) {
+                    if(weights == null) {
+                        result--;
+                    } else {
+                        result -= weights[i];
+                    }
                 }
             }
         }

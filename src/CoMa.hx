@@ -52,16 +52,16 @@ class CoMa {
         return "rgb(" + Std.int(r) + "," + Std.int(g) + "," + Std.int(b) + ")";
     }
 
-    public static function runComaJS(a:Array<String>, printer:Printer, printer2:Printer, printer3:Printer, namesOfMarkerFiles:Array<String>):Void {
+    public static function runComaJS(a:Array<String>, printer:Printer, printer2:Printer, printer3:Printer, namesOfMarkerFiles:Array<String>, runComaFromPartition:Int):Void {
         var l:List<List<Pair<String, String>>> = new List<List<Pair<String, String>>>();
         for(i in 0...a.length) {
             l.add(LstParser.parseLst(a[i]));
         }
-        runComa(l, printer, printer2, printer3, namesOfMarkerFiles);
+        runComa(l, printer, printer2, printer3, namesOfMarkerFiles, runComaFromPartition);
     }
 
     // printer3: partitions
-    public static function runComa(l:List<List<Pair<String, String>>>, printer:Printer, printer2:Printer, printer3:Printer, namesOfMarkerFiles:Array<String>):Void {
+    public static function runComa(l:List<List<Pair<String, String>>>, printer:Printer, printer2:Printer, printer3:Printer, namesOfMarkerFiles:Array<String>, compStrategy:Int):Void {
         // 1. Step Table
         var comaIndL:List<CoMaInd> = new List<CoMaInd>();
         var index:Int = 0;
@@ -97,9 +97,9 @@ class CoMa {
             printer3.printString("\n");
         }
         printer3.close();
-        runComaFromPartition(new Pair<List<CoMaInd>, Null<Array<Int>>>(comaIndL, null), printer, printer2);
+        runComaFromPartition(new Pair<List<CoMaInd>, Null<Array<Int>>>(comaIndL, null), printer, printer2, compStrategy);
     }
-    public static function runComaFromPartition(comaIndLP:Pair<List<CoMaInd>, Null<Array<Int>>>, printer:Printer, printer2:Printer):Void {
+    public static function runComaFromPartition(comaIndLP:Pair<List<CoMaInd>, Null<Array<Int>>>, printer:Printer, printer2:Printer, compStrategy:Int):Void {
         // xxx
         var comaIndL:List<CoMaInd> = comaIndLP.first;
         var weights:Null<Array<Int>> = comaIndLP.second;
@@ -117,7 +117,7 @@ class CoMa {
         } else if(comaIndL.length == 2) {
             orderedL.add(comaIndL.pop());
             orderedL.add(comaIndL.pop());
-            highestVal = orderedL.first().compare(orderedL.last(), weights);
+            highestVal = orderedL.first().compare(orderedL.last(), weights, compStrategy);
             lowestVal = highestVal;
         } else {
             // get the pair of elements that is nearest
@@ -126,7 +126,7 @@ class CoMa {
             var bestE2:CoMaInd = null;
             for(e1 in comaIndL) {
                 for(e2 in comaIndL) {
-                    var dist:Float = e1.compare(e2, weights);
+                    var dist:Float = e1.compare(e2, weights, compStrategy);
                     if(e1 != e2) {
                         if(dist > bestDist) {
                             bestDist = dist;
@@ -149,8 +149,8 @@ class CoMa {
                 var bestEFirst:CoMaInd = null;
                 var bestELast:CoMaInd = null;
                 for(e in comaIndL) {
-                    var distFirst:Float = e.compare(orderedL.first(), weights);
-                    var distLast:Float = e.compare(orderedL.last(), weights);
+                    var distFirst:Float = e.compare(orderedL.first(), weights, compStrategy);
+                    var distLast:Float = e.compare(orderedL.last(), weights, compStrategy);
                     if(distFirst > bestDistFirst) {
                         bestDistFirst = distFirst;
                         bestEFirst = e;
@@ -177,7 +177,7 @@ class CoMa {
         for(e1 in orderedL) {
             printer2.printString(e1.indName);
             for(e2 in orderedL) {
-                var dist:Float = e1.compare(e2, weights);
+                var dist:Float = e1.compare(e2, weights, compStrategy);
                 printer2.printString("\t" + dist);
             }
             printer2.printString("\n");
@@ -201,7 +201,7 @@ class CoMa {
         var j:Int = 0;
         for(e1 in orderedL) {
             for(e2 in orderedL) {
-                var dist:Float = e1.compare(e2, weights);
+                var dist:Float = e1.compare(e2, weights, compStrategy);
                 printer.printString("<rect x=\"" + (100 + 20 * i) + "\" y=\"" + (100 + 20 * j) + "\" width=\"20\" height=\"20\" fill=\"" + cToCol(dist, highestVal, lowestVal) + "\"/>");
                 j++;
             }
@@ -251,7 +251,7 @@ class CoMa {
             var comaIndL:Pair<List<CoMaInd>, Null<Array<Int>>> = parsePartitionFile(fileContent);
             var printer2:NullPrinter = new NullPrinter();
             var printer:StdOutPrinter = new StdOutPrinter();
-            runComaFromPartition(comaIndL, printer, printer2);
+            runComaFromPartition(comaIndL, printer, printer2, 0);
         } else {
             var l:List<List<Pair<String, String>>> = new List<List<Pair<String, String>>>();
             var namesOfMarkerFiles:Array<String> = new Array<String>();
@@ -274,7 +274,7 @@ class CoMa {
             var printer2:NullPrinter = new NullPrinter();
             var printer3:NullPrinter = new NullPrinter();
             var printer:StdOutPrinter = new StdOutPrinter();
-            runComa(l, printer, printer2, printer3, namesOfMarkerFiles);
+            runComa(l, printer, printer2, printer3, namesOfMarkerFiles, 0);
         }
 #end
     }
