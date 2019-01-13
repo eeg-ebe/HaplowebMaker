@@ -107,65 +107,77 @@ class CoMa {
         var orderedL:List<CoMaInd> = new List<CoMaInd>();
         var highestVal:Float = Math.NEGATIVE_INFINITY;
         var lowestVal:Float = Math.POSITIVE_INFINITY;
-        if(comaIndL.length == 0) {
-            highestVal = 0;
-            lowestVal = 0;
-        } else if(comaIndL.length == 1) {
-            orderedL.add(comaIndL.pop());
-            highestVal = 0;
-            lowestVal = 0;
-        } else if(comaIndL.length == 2) {
-            orderedL.add(comaIndL.pop());
-            orderedL.add(comaIndL.pop());
-            highestVal = orderedL.first().compare(orderedL.last(), weights, compStrategy);
-            lowestVal = highestVal;
-        } else {
-            // get the pair of elements that is nearest
-            var bestDist:Float = Math.NEGATIVE_INFINITY;
-            var bestE1:CoMaInd = null;
-            var bestE2:CoMaInd = null;
-            for(e1 in comaIndL) {
-                for(e2 in comaIndL) {
+        if(compStrategy < -1) {
+            compStrategy = compStrategy + 5;
+            orderedL = comaIndL;
+            for(e1 in orderedL) {
+                for(e2 in orderedL) {
                     var dist:Float = e1.compare(e2, weights, compStrategy);
-                    if(e1 != e2) {
-                        if(dist > bestDist) {
-                            bestDist = dist;
-                            bestE1 = e1;
-                            bestE2 = e2;
-                        }
-                    }
                     highestVal = Math.max(highestVal, dist);
                     lowestVal = Math.min(lowestVal, dist);
                 }
             }
-            comaIndL.remove(bestE1);
-            comaIndL.remove(bestE2);
-            orderedL.add(bestE1);
-            orderedL.add(bestE2);
-            // go on
-            while(!comaIndL.isEmpty()) {
-                var bestDistFirst:Float = Math.NEGATIVE_INFINITY;
-                var bestDistLast:Float = Math.NEGATIVE_INFINITY;
-                var bestEFirst:CoMaInd = null;
-                var bestELast:CoMaInd = null;
-                for(e in comaIndL) {
-                    var distFirst:Float = e.compare(orderedL.first(), weights, compStrategy);
-                    var distLast:Float = e.compare(orderedL.last(), weights, compStrategy);
-                    if(distFirst > bestDistFirst) {
-                        bestDistFirst = distFirst;
-                        bestEFirst = e;
-                    }
-                    if(distLast > bestDistLast) {
-                        bestDistLast = distLast;
-                        bestELast = e;
+        } else {
+            if(comaIndL.length == 0) {
+                highestVal = 0;
+                lowestVal = 0;
+            } else if(comaIndL.length == 1) {
+                orderedL.add(comaIndL.pop());
+                highestVal = 0;
+                lowestVal = 0;
+            } else if(comaIndL.length == 2) {
+                orderedL.add(comaIndL.pop());
+                orderedL.add(comaIndL.pop());
+                highestVal = orderedL.first().compare(orderedL.last(), weights, compStrategy);
+                lowestVal = highestVal;
+            } else {
+                // get the pair of elements that is nearest
+                var bestDist:Float = Math.NEGATIVE_INFINITY;
+                var bestE1:CoMaInd = null;
+                var bestE2:CoMaInd = null;
+                for(e1 in comaIndL) {
+                    for(e2 in comaIndL) {
+                        var dist:Float = e1.compare(e2, weights, compStrategy);
+                        if(e1 != e2) {
+                            if(dist > bestDist) {
+                                bestDist = dist;
+                                bestE1 = e1;
+                                bestE2 = e2;
+                            }
+                        }
+                        highestVal = Math.max(highestVal, dist);
+                        lowestVal = Math.min(lowestVal, dist);
                     }
                 }
-                if(bestDistFirst > bestDistLast) {
-                    comaIndL.remove(bestEFirst);
-                    orderedL.push(bestEFirst); // to the beginning
-                } else {
-                    comaIndL.remove(bestELast);
-                    orderedL.add(bestELast); // to the end
+                comaIndL.remove(bestE1);
+                comaIndL.remove(bestE2);
+                orderedL.add(bestE1);
+                orderedL.add(bestE2);
+                // go on
+                while(!comaIndL.isEmpty()) {
+                    var bestDistFirst:Float = Math.NEGATIVE_INFINITY;
+                    var bestDistLast:Float = Math.NEGATIVE_INFINITY;
+                    var bestEFirst:CoMaInd = null;
+                    var bestELast:CoMaInd = null;
+                    for(e in comaIndL) {
+                        var distFirst:Float = e.compare(orderedL.first(), weights, compStrategy);
+                        var distLast:Float = e.compare(orderedL.last(), weights, compStrategy);
+                        if(distFirst > bestDistFirst) {
+                            bestDistFirst = distFirst;
+                            bestEFirst = e;
+                        }
+                        if(distLast > bestDistLast) {
+                            bestDistLast = distLast;
+                            bestELast = e;
+                        }
+                    }
+                    if(bestDistFirst > bestDistLast) {
+                        comaIndL.remove(bestEFirst);
+                        orderedL.push(bestEFirst); // to the beginning
+                    } else {
+                        comaIndL.remove(bestELast);
+                        orderedL.add(bestELast); // to the end
+                    }
                 }
             }
         }
