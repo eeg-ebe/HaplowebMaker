@@ -465,6 +465,57 @@ class Graph {
         }
         return minLineSize;
     }
+    public inline function normalizeGraph():Void {
+        // calculate view box
+        var maxX:Float = Math.NEGATIVE_INFINITY;
+        var maxY:Float = Math.NEGATIVE_INFINITY;
+        var minX:Float = Math.POSITIVE_INFINITY;
+        var minY:Float = Math.POSITIVE_INFINITY;
+        for(node in nodes) {
+            if(drawCirclesNames) {
+                // XXX: Take name length into account
+            }
+            maxX = Math.max(maxX, node.maxX());
+            maxY = Math.max(maxY, node.maxY());
+            minX = Math.min(minX, node.minX());
+            minY = Math.min(minY, node.minY());
+        }
+        for(link in links) {
+            var x:Float = link.getMMX(); var y:Float = link.getMMY();
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+        }
+        var width:Float = maxX - minX + 30;
+        var height:Float = maxY - minY + 30;
+        // normalize
+        // assume we have a 1920 x 1080 screen
+        var sw:Float;
+        var sh:Float;
+        var l:Float;
+        // node
+        l = getMinCircleSize();
+        sw = width / 1920 / l;
+        sh = height / 1080 / l;
+        if(!(l * 1920 / width < 5 || l * 1080 / height < 5)) {
+            modifyNodes(5 * Math.max(sw, sh));
+        }
+        // connections
+        l = getMinLineSize();
+        sw = width / 1920 / l;
+        sh = height / 1080 / l;
+        if(!(l * 1920 / width < 5 || l * 1080 / height < 5)) {
+            modifyCons(5 * Math.max(sw, sh));
+        }
+        // links
+        l = getMinCurveSize();
+        sw = width / 1920 / l;
+        sh = height / 1080 / l;
+        if(!(l * 1920 / width < 5 || l * 1080 / height < 5)) {
+            modifyLinks(5 * Math.max(sw, sh));
+        }
+    }
 
     public inline function getSvgCode(?ow:Float=-1, ?oh:Float=-1) {
         // calculate view box
