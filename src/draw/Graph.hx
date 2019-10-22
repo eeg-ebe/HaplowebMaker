@@ -494,26 +494,27 @@ class Graph {
         var sw:Float;
         var sh:Float;
         var l:Float;
+        var minSize:Float = 15;
         // node
         l = getMinCircleSize();
         sw = width / 1920 / l;
         sh = height / 1080 / l;
-        if(!(l * 1920 / width < 5 || l * 1080 / height < 5)) {
-            modifyNodes(5 * Math.max(sw, sh));
+        if(!(l * 1920 / width < minSize || l * 1080 / height < minSize)) {
+            modifyNodes(minSize * Math.max(sw, sh));
         }
         // connections
         l = getMinLineSize();
         sw = width / 1920 / l;
         sh = height / 1080 / l;
-        if(!(l * 1920 / width < 5 || l * 1080 / height < 5)) {
-            modifyCons(5 * Math.max(sw, sh));
+        if(!(l * 1920 / width < minSize || l * 1080 / height < minSize)) {
+            modifyCons(minSize * Math.max(sw, sh));
         }
         // links
         l = getMinCurveSize();
         sw = width / 1920 / l;
         sh = height / 1080 / l;
-        if(!(l * 1920 / width < 5 || l * 1080 / height < 5)) {
-            modifyLinks(5 * Math.max(sw, sh));
+        if(!(l * 1920 / width < minSize || l * 1080 / height < minSize)) {
+            modifyLinks(minSize * Math.max(sw, sh));
         }
     }
 
