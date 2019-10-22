@@ -499,21 +499,21 @@ class Graph {
         l = getMinCircleSize();
         sw = width / 1920 / l;
         sh = height / 1080 / l;
-        if(!(l * 1920 / width < minSize || l * 1080 / height < minSize)) {
+        if((l * 1920 / width < minSize || l * 1080 / height < minSize)) {
             modifyNodes(minSize * Math.max(sw, sh));
         }
         // connections
         l = getMinLineSize();
         sw = width / 1920 / l;
         sh = height / 1080 / l;
-        if(!(l * 1920 / width < minSize || l * 1080 / height < minSize)) {
+        if((l * 1920 / width < minSize || l * 1080 / height < minSize)) {
             modifyCons(minSize * Math.max(sw, sh));
         }
         // links
         l = getMinCurveSize();
         sw = width / 1920 / l;
         sh = height / 1080 / l;
-        if(!(l * 1920 / width < minSize || l * 1080 / height < minSize)) {
+        if((l * 1920 / width < minSize || l * 1080 / height < minSize)) {
             modifyLinks(minSize * Math.max(sw, sh));
         }
     }
