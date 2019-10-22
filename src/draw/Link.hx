@@ -67,7 +67,12 @@ class Link {
             result.add(" " + n2.xPos);
             result.add(" " + n2.yPos);
             result.add("' stroke='");
-            result.add(strokeColor);
+            if(strokeColor == null) {
+                trace("WRN: Use black instead of null as strokecolor");
+                result.add("black");
+            } else {
+                result.add(strokeColor);
+            }
             result.add("' stroke-width='");
             result.add(strokeWidth + "' ");
             if(!this.dashedArray.isEmpty()) {
@@ -119,7 +124,12 @@ class Link {
                 result.add(" " + (n2.xPos + v10X * l));
                 result.add(" " + (n2.yPos + v10Y * l));
                 result.add("' stroke='");
-                result.add(c);
+                if(c == null) {
+                    trace("WRN: Use black instead of null as strokecolor");
+                    result.add("black");
+                } else {
+                    result.add(c);
+                }
                 result.add("' stroke-width='");
                 result.add((d * factor) + "' ");
                 if(!this.dashedArray.isEmpty()) {

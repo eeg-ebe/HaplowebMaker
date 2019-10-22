@@ -184,7 +184,7 @@ class Graph {
                 for(name2 in link.n2.node.names) {
                     var nn2:String = Seq.getIndIdentifier(name2);
                     if(nn1 == nn2) {
-                        var colorName:String = null;
+                        var colorName:String = "black";
                         if(ignoreCase) {
                             for(p in l) {
                                 if(p.first.toUpperCase() == nn1.toUpperCase()) {
@@ -442,6 +442,28 @@ class Graph {
             link.xPos = Std.parseFloat(attrs[4]);
             link.yPos = Std.parseFloat(attrs[5]);
         }
+    }
+
+    public inline function getMinCircleSize():Float {
+        var minCircleSize:Float = Math.POSITIVE_INFINITY;
+        for(node in nodes) {
+            minCircleSize = Math.min(minCircleSize, node.radius);
+        }
+        return minCircleSize;
+    }
+    public inline function getMinCurveSize():Float {
+        var minCurveSize:Float = Math.POSITIVE_INFINITY;
+        for(link in links) {
+            minCurveSize = Math.min(minCurveSize, link.strokeWidth);
+        }
+        return minCurveSize;
+    }
+    public inline function getMinLineSize():Float {
+        var minLineSize:Float = Math.POSITIVE_INFINITY;
+        for(con in cons) {
+            minLineSize = Math.min(minLineSize, con.strokeWidth);
+        }
+        return minLineSize;
     }
 
     public inline function getSvgCode(?ow:Float=-1, ?oh:Float=-1) {
