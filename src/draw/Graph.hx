@@ -494,28 +494,29 @@ class Graph {
         var sw:Float;
         var sh:Float;
         var l:Float;
-        var minSize:Float = 15;
-        // node
-        l = getMinCircleSize();
+        var minSize:Float = 3;
         sw = width / 1920 / l;
         sh = height / 1080 / l;
-        if((l * 1920 / width < minSize || l * 1080 / height < minSize)) {
-            modifyNodes(minSize * Math.max(sw, sh));
+        var stretch:Float = Math.max(sw, sh);
+        // node
+        l = getMinCircleSize();
+        var mstretch:Float = 1;
+        if((l * 1920 / width < 5 || l * 1080 / height < 5)) {
+            mstretch = Math.max(mstretch, 5 * stretch);
         }
         // connections
         l = getMinLineSize();
-        sw = width / 1920 / l;
-        sh = height / 1080 / l;
         if((l * 1920 / width < minSize || l * 1080 / height < minSize)) {
-            modifyCons(minSize * Math.max(sw, sh));
+            mstretch = Math.max(mstretch, minSize * stretch);
         }
         // links
         l = getMinCurveSize();
-        sw = width / 1920 / l;
-        sh = height / 1080 / l;
         if((l * 1920 / width < minSize || l * 1080 / height < minSize)) {
-            modifyLinks(minSize * Math.max(sw, sh));
+            mstretch = Math.max(mstretch, minSize * stretch);
         }
+        modifyNodes(mstretch);
+        modifyCons(mstretch);
+        modifyLinks(mstretch);
     }
 
     public inline function getSvgCode(?ow:Float=-1, ?oh:Float=-1) {
