@@ -71,7 +71,7 @@ class MJAlgo {
         #end
     }
 
-    public inline function runMJ(epsilon:Float, ?onlyMinimumSpanning:Bool=false):Void {
+    public function runMJ(epsilon:Float, ?onlyMinimumSpanning:Bool=false):Void {
         if(seqs.size > 1) { // need at least one sequence
             var i:Int;
             do {
@@ -538,8 +538,20 @@ class MJAlgo {
     public inline function getNrSeqs():Int {
         return seqCount;
     }
-    public inline function getNrDifSeqs():Int {
-        return this.seqs.size;
+    public inline function getNrDifSeqs():String {
+        var normal:Int = 0;
+        var median:Int = 0;
+        var current:Seq = seqs.first;
+        while(current != null) {
+            if (current.names.length != 0) {
+                normal++;
+            } else {
+                median++;
+            }
+            current = current.next;
+        }
+        return normal + "+" + median;
+//        return this.seqs.size;
     }
     public inline function getSeqLength():Int {
         return this.seqs.origSeqLen;
