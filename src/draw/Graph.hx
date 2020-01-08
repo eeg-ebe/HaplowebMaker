@@ -493,13 +493,12 @@ class Graph {
         // assume we have a 1920 x 1080 screen
         var sw:Float;
         var sh:Float;
-        var l:Float;
+        var l:Float = getMinCircleSize();
         var minSize:Float = 3;
         sw = width / 1920 / l;
         sh = height / 1080 / l;
         var stretch:Float = Math.max(sw, sh);
         // node
-        l = getMinCircleSize();
         var mstretch:Float = 1;
         if((l * 1920 / width < 5 || l * 1080 / height < 5)) {
             mstretch = Math.max(mstretch, 5 * stretch);
