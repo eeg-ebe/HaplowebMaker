@@ -101,7 +101,7 @@ class NodePos {
                 }
             }
 if(colorName == null) {
-    trace("WARN: No colorname found/given for '" + name + "'!");
+    throw("No colorname found/given for '" + name + "'!");
 }
             var found:Bool = false;
             for(p in l_) {
