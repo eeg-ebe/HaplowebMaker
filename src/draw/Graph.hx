@@ -161,7 +161,7 @@ class Graph {
     }
 
     public inline function assingPiesByTxt(s:String, ignoreCase:Bool, byIndNameOnly:Bool):Void {
-        assignPieCharts(LstParser.parseLst(s), ignoreCase, byIndNameOnly);
+        assignPieCharts(LstParser.parseColorList(s), ignoreCase, byIndNameOnly);
     }
     public inline function assignPieCharts(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool/*, byRegEx:Bool*/):Void {
         for(node in nodes) {
@@ -173,7 +173,7 @@ class Graph {
         }
     }
     public function initStrokeColorListByStr(s:String, ignoreCase:Bool):Void {
-        initStrokeColorList(LstParser.parseLst(s), ignoreCase);
+        initStrokeColorList(LstParser.parseColorList(s), ignoreCase);
     }
     public function initStrokeColorList(l:List<Pair<String,String>>, ignoreCase:Bool):Void {
         for(link in links) {
