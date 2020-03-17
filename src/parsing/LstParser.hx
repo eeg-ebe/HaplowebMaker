@@ -33,7 +33,7 @@ class LstParser {
         }
         s = s.toUpperCase();
         if (s.charAt(0) == "#") {
-            if (s.length != 4 || s.length != 7) {
+            if (s.length != 4 && s.length != 7) {
                 return false;
             }
             for (i in 1...s.length) {
