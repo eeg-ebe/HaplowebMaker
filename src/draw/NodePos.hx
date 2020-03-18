@@ -101,7 +101,7 @@ class NodePos {
                 }
             }
 if(colorName == null) {
-    throw("No colorname found/given for '" + name + "'!");
+    throw("No colorname found for individual '" + name + "'!");
 }
             var found:Bool = false;
             for(p in l_) {
