@@ -200,11 +200,15 @@ class LstParser {
     }
     public static function parseColorList(fileContent:String):List<Pair<String, String>> {
         var result:List<Pair<String, String>> = parseLst(fileContent);
+        var lst:List<String> = new List<String>();
         for(pair in result) {
             pair.second = StringTools.trim(pair.second);
             if (!isValidColor(pair.second)) {
-                throw "Invalid color " + pair.second;
+                lst.add(pair.second);
             }
+        }
+        if (!lst.isEmpty()) {
+            throw "Invalid color(s) " + (lst.join(","));
         }
         return result;
     }
