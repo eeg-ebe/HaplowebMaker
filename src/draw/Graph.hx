@@ -160,17 +160,22 @@ class Graph {
         return result;
     }
 
-    public inline function assingPiesByTxt(s:String, ignoreCase:Bool, byIndNameOnly:Bool):Void {
-        assignPieCharts(LstParser.parseColorList(s), ignoreCase, byIndNameOnly);
+    public inline function assingPiesByTxt(s:String, ignoreCase:Bool, byIndNameOnly:Bool):String {
+        return assignPieCharts(LstParser.parseColorList(s), ignoreCase, byIndNameOnly);
     }
-    public inline function assignPieCharts(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool/*, byRegEx:Bool*/):Void {
+    public inline function assignPieCharts(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool/*, byRegEx:Bool*/):String {
+        var warnings:List<String> = new List<String>();
         for(node in nodes) {
             if(node.node.names.length == 0) {
                 node.set_color("grey");
                 continue;
             }
-            node.set_pieByLst(l, ignoreCase, byIndNameOnly/*, byRegEx*/);
+            var result:String = node.set_pieByLst(l, ignoreCase, byIndNameOnly/*, byRegEx*/);
+            if (result != "") {
+                warnings.add(result);
+            }
         }
+        return warnings.join(",");
     }
     public function initStrokeColorListByStr(s:String, ignoreCase:Bool):Void {
         initStrokeColorList(LstParser.parseColorList(s), ignoreCase);

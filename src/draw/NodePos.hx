@@ -80,8 +80,9 @@ class NodePos {
         l.add(new Pair<String,Int>(s, 1));
         this.set_pie(l);
     }
-    public inline function set_pieByLst(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool/*, byRegEx:Bool*/):Void {
+    public inline function set_pieByLst(l:List<Pair<String,String>>, ignoreCase:Bool, byIndNameOnly:Bool/*, byRegEx:Bool*/):String {
         var l_:List<Pair<String,Int>> = new List<Pair<String,Int>>();
+        var warnings:List<String> = new List<String>();
         for(name in node.names) {
             if(byIndNameOnly) {
                 name = Seq.getIndIdentifier(name);
@@ -101,7 +102,8 @@ class NodePos {
                 }
             }
 if(colorName == null) {
-    throw("No colorname found for individual '" + name + "'!");
+    trace("No colorname found for individual '" + name + "'!");
+    warnings.add(name);
 }
             var found:Bool = false;
             for(p in l_) {
@@ -116,6 +118,7 @@ if(colorName == null) {
             }
         }
         this.set_pie(l_);
+        return warnings.join(",");
     }
     public inline function set_strokeColor(n:String):Void {
         valid = false;
