@@ -44,7 +44,7 @@ class Link {
             this.w = w;
             this.strokeWidth = w;
         }
-        this.strokeColor = "blue";
+        this.strokeColor = "#000";
         this.dashedArray = new List<Float>();
         this.setByUser = false;
     }

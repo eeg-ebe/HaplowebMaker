@@ -194,7 +194,7 @@ if(colorName == null) {
         result.add("' ");
         // pie
         if(this.pie.isEmpty()) {
-            result.add("fill='blue'");
+            result.add("fill='black'");
         } else if(this.pie.length == 1) {
             result.add("fill='");
             result.add(pie.first().first);
@@ -254,7 +254,7 @@ if(colorName == null) {
             x = this.xPos + (this.xPos / l) * this.radius;
             y = this.yPos + (this.yPos / l) * this.radius;
         }
-        return "<circle cx='" + x + "' cy='" + y + "' r='" + this.radius + "' stroke-width='" + n + "' stroke='blue' fill='none'/>";
+        return "<circle cx='" + x + "' cy='" + y + "' r='" + this.radius + "' stroke-width='" + n + "' stroke='black' fill='none'/>";
     }
     public inline function getNodeNameSvg() {
         if(node.type != SAMPLED_SEQUENCE) {
