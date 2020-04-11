@@ -265,6 +265,7 @@ class Graph {
         n.set_color(s);
         n.isProcessed = true;
         for(link in links) {
+            link.strokeColorList = null;
             if(link.n1 == n) {
                 link.strokeColor = s;
                 if(!link.n2.isProcessed) {
