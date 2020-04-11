@@ -104,6 +104,7 @@ class NodePos {
 if(colorName == null) {
     trace("No colorname found for individual '" + name + "'!");
     warnings.add(name);
+    colorName = "black"; // fallback: black
 }
             var found:Bool = false;
             for(p in l_) {
