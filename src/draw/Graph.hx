@@ -307,6 +307,7 @@ class Graph {
         var result:List<String> = new List<String>();
         // defaults
         var n:List<String> = new List<String>();
+        n.add("A");
         n.add((drawCircles) ? "1" : "0");
         n.add((drawCons) ? "1" : "0");
         n.add((drawCurves) ? "1" : "0");
@@ -359,6 +360,19 @@ class Graph {
             // save link attributes
             n.add("" + link.w);
             n.add(link.strokeColor);
+            if (link.strokeColorList == null) {
+                n.add("null");
+            } else {
+                var x:List<String> = new List<String>();
+                for (p in link.strokeColorList) {
+                    if(p == null) {
+                        x.add("null");
+                    } else {
+                        x.add(p.first + "$" + p.second);
+                    }
+                }
+                n.add(x.join("|"));
+            }
             n.add("" + link.strokeWidth);
             n.add(link.dashedArray.join("|"));
             n.add("" + link.xPos);
@@ -382,13 +396,24 @@ class Graph {
             lines.add(line);
         }
         // restore drawings
+        var saveVersion:Int = 0; // starts with X?
         var attrs:Array<String> = lines.pop().split("\x02");
-        drawCircles = (attrs[0] == "1");
-        drawCons = (attrs[1] == "1");
-        drawCurves = (attrs[2] == "1");
-        drawBezierPoints = (attrs[3] == "1");
-        drawCenter = (attrs[4] == "1");
-        drawAngles = (attrs[5] == "1");
+        if (attrs[0] == "A") {
+            saveVersion = 1;
+            drawCircles = (attrs[1] == "1");
+            drawCons = (attrs[2] == "1");
+            drawCurves = (attrs[3] == "1");
+            drawBezierPoints = (attrs[4] == "1");
+            drawCenter = (attrs[5] == "1");
+            drawAngles = (attrs[6] == "1");
+        } else {
+            drawCircles = (attrs[0] == "1");
+            drawCons = (attrs[1] == "1");
+            drawCurves = (attrs[2] == "1");
+            drawBezierPoints = (attrs[3] == "1");
+            drawCenter = (attrs[4] == "1");
+            drawAngles = (attrs[5] == "1");
+        }
         // restore node style
         for(node in nodes) {
             var attrs:Array<String> = lines.pop().split("\x02");
@@ -440,13 +465,38 @@ class Graph {
             var attrs:Array<String> = lines.pop().split("\x02");
             link.w = Std.parseFloat(attrs[0]);
             link.strokeColor = attrs[1];
-            link.strokeWidth = Std.parseFloat(attrs[2]);
-            link.dashedArray = new List<Float>();
-            for(f in attrs[3].split("|")) {
-                link.dashedArray.add(Std.parseFloat(f));
+            if (saveVersion == 1) {
+                if (attrs[3] == "null") {
+                    link.strokeColorList = null;
+                } else {
+                    link.strokeColorList = new List<Pair<String,Int>>();
+                    for(f in attrs[3].split("|")) {
+                        if (f == "null") {
+                            link.strokeColorList.add(null);
+                        } else {
+                            var first:String = f.split("$")[0];
+                            var second:Int = Std.parseInt(f.split("$")[1]);
+                            var p:Pair<String,Int> = new Pair<String,Int>(first, second);
+                            link.strokeColorList.add(p);
+                        }
+                    }
+                }
+                link.strokeWidth = Std.parseFloat(attrs[3]);
+                link.dashedArray = new List<Float>();
+                for(f in attrs[4].split("|")) {
+                    link.dashedArray.add(Std.parseFloat(f));
+                }
+                link.xPos = Std.parseFloat(attrs[5]);
+                link.yPos = Std.parseFloat(attrs[6]);                
+            } else {
+                link.strokeWidth = Std.parseFloat(attrs[2]);
+                link.dashedArray = new List<Float>();
+                for(f in attrs[3].split("|")) {
+                    link.dashedArray.add(Std.parseFloat(f));
+                }
+                link.xPos = Std.parseFloat(attrs[4]);
+                link.yPos = Std.parseFloat(attrs[5]);
             }
-            link.xPos = Std.parseFloat(attrs[4]);
-            link.yPos = Std.parseFloat(attrs[5]);
         }
     }
 
