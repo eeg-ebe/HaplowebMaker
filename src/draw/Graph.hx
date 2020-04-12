@@ -370,7 +370,7 @@ class Graph {
                     } else {
                         x.add(
                             ((p.first == null) ? "null" : p.first)
-                            + "$" +
+                            + "\x01" +
                             ((p.second == null) ? "null" : "" + p.second)
                         );
                     }
@@ -429,6 +429,7 @@ class Graph {
             node.set_strokeWidth(Std.parseFloat(attrs[5]));
             var l:List<Float> = new List<Float>();
             for(f in attrs[6].split("|")) {
+                if (f == "" || f == null) { continue; }
                 l.add(Std.parseFloat(f));
             }
             node.set_dashedArray(l);
@@ -437,30 +438,67 @@ class Graph {
         for(con in cons) {
             var attrs:Array<String> = lines.pop().split("\x02");
             con.strokeColor = attrs[0];
-            con.strokeWidth = Std.parseFloat(attrs[1]);
+            if (attrs[1] == "null") {
+                con.strokeWidth = null;
+            } else {
+                con.strokeWidth = Std.parseFloat(attrs[1]);
+            }
             con.dashedArray = new List<Float>();
             for(f in attrs[2].split("|")) {
+                if ( f == null || f == "" ) {
+                    continue;
+                }
                 con.dashedArray.add(Std.parseFloat(f));
             }
             con.drawMutsByLine = (attrs[3] == "1");
             con.drawMutsLineStrokeColor = attrs[4];
-            con.drawMutsLineWidth = Std.parseFloat(attrs[5]);
-            con.drawMutsLineLen = Std.parseFloat(attrs[6]);
+            if (attrs[5] == "null") {
+                con.drawMutsLineWidth = null;
+            } else {
+                con.drawMutsLineWidth = Std.parseFloat(attrs[5]);
+            }
+            if(attrs[6] == "null") {
+                con.drawMutsLineLen = null;
+            } else {
+                con.drawMutsLineLen = Std.parseFloat(attrs[6]);
+            }
             con.drawMutsLineDashedArray = new List<Float>();
             for(f in attrs[7].split("|")) {
+                if ( f == null || f == "" ) {
+                    continue;
+                }
                 con.drawMutsLineDashedArray.add(Std.parseFloat(f));
             }
             con.drawMutsByText = (attrs[8] == "1");
             con.drawMutsTextFont = attrs[9];
-            con.drawMutsTextSize = Std.parseFloat(attrs[10]);
+            if(attrs[10] == "null") {
+                con.drawMutsTextSize = null;
+            } else {
+                con.drawMutsTextSize = Std.parseFloat(attrs[10]);
+            }
             con.drawMutsTextColor = attrs[11];
-            con.drawMutsTextPX = Std.parseFloat(attrs[12]);
-            con.drawMutsTextPY = Std.parseFloat(attrs[13]);
+            if(attrs[12] == "null") {
+                con.drawMutsTextPX = null;
+            } else {
+                con.drawMutsTextPX = Std.parseFloat(attrs[12]);
+            }
+            if(attrs[13] == "null") {
+                con.drawMutsTextPY = null;
+            } else {
+                con.drawMutsTextPY = Std.parseFloat(attrs[13]);
+            }
             con.drawMutsByDots = (attrs[14] == "1");
-            con.drawMutsDotsSize = Std.parseFloat(attrs[15]);
+            if(attrs[15] == "null") {
+                con.drawMutsDotsSize = null;
+            } else {
+                con.drawMutsDotsSize = Std.parseFloat(attrs[15]);
+            }
             con.drawMutsDotsColor = attrs[16];
             con.drawMutsDotsDashedArray = new List<Float>();
             for(f in attrs[17].split("|")) {
+                if ( f == null || f == "" ) {
+                    continue;
+                }
                 con.drawMutsDotsDashedArray.add(Std.parseFloat(f));
             }
         }
@@ -480,14 +518,14 @@ class Graph {
                         } else if(f == "" || f == null) {
                             continue; // nothing to do
                         } else {
-                            var first:String = f.split("$")[0];
+                            var first:String = f.split("\x01")[0];
                             if (first == "null" || first == "") {
                                 first = null;
                             }
-                            var secondStr = f.split("$")[1];
+                            var secondStr = f.split("\x01")[1];
                             var second:Null<Int> = null;
                             if (!(secondStr == "null" || secondStr == "")) {
-                                second = Std.parseInt(f.split("$")[1]);
+                                second = Std.parseInt(secondStr);
                             }
                             var p:Pair<String,Int> = new Pair<String,Int>(first, second);
                             link.strokeColorList.add(p);
@@ -497,6 +535,7 @@ class Graph {
                 link.strokeWidth = Std.parseFloat(attrs[3]);
                 link.dashedArray = new List<Float>();
                 for(f in attrs[4].split("|")) {
+                    if ( f == "" || f == null ) { continue; }
                     link.dashedArray.add(Std.parseFloat(f));
                 }
                 link.xPos = Std.parseFloat(attrs[5]);
@@ -505,6 +544,7 @@ class Graph {
                 link.strokeWidth = Std.parseFloat(attrs[2]);
                 link.dashedArray = new List<Float>();
                 for(f in attrs[3].split("|")) {
+                    if ( f == "" || f == null ) { continue; }
                     link.dashedArray.add(Std.parseFloat(f));
                 }
                 link.xPos = Std.parseFloat(attrs[4]);
