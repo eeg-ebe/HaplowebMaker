@@ -473,6 +473,8 @@ class Graph {
                     for(f in attrs[3].split("|")) {
                         if (f == "null") {
                             link.strokeColorList.add(null);
+                        } else if(f == "" || f == null) {
+                            continue; // nothing to do
                         } else {
                             var first:String = f.split("$")[0];
                             var second:Int = Std.parseInt(f.split("$")[1]);
