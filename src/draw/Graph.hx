@@ -123,8 +123,8 @@ class Graph {
             minY = Math.min(minY, y);
         }
         // now transform
-        x = x + minX - 15;
-        y = y + minY - 15;
+        x = x + minX - 100;
+        y = y + minY - 100;
         // search
         var result:Dynamic = null;
         var best:Float = Math.POSITIVE_INFINITY;
@@ -608,8 +608,8 @@ class Graph {
             minX = Math.min(minX, x);
             minY = Math.min(minY, y);
         }
-        var width:Float = maxX - minX + 30;
-        var height:Float = maxY - minY + 30;
+        var width:Float = maxX - minX + 200;
+        var height:Float = maxY - minY + 200;
         // normalize
         // assume we have a 1920 x 1080 screen
         var sw:Float;
@@ -661,8 +661,8 @@ class Graph {
             minX = Math.min(minX, x);
             minY = Math.min(minY, y);
         }
-        var width:Float = maxX - minX + 30;
-        var height:Float = maxY - minY + 30;
+        var width:Float = maxX - minX + 200;
+        var height:Float = maxY - minY + 200;
         // w/h
         var f1:Float = ow / width;
         if(ow == -1) {
@@ -679,7 +679,7 @@ class Graph {
         var result:List<String> = new List<String>();
         result.add("<svg version='1.1' baseProfile='full' width='" + ow);
         result.add("' height='" + oh);
-        result.add("' viewBox='" + (minX - 15) + "," + (minY - 15) + "," + width + "," + height + "' xmlns='http://www.w3.org/2000/svg'>");
+        result.add("' viewBox='" + (minX - 100) + "," + (minY - 100) + "," + width + "," + height + "' xmlns='http://www.w3.org/2000/svg'>");
         if(drawCons) {
             for(con in cons) {
                 result.add(con.getNodeSvg());
