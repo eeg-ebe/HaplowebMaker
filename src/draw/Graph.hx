@@ -22,6 +22,7 @@ class Graph {
     public var drawAngles:Bool=false;
 
     public var lastStretchFact:Float;
+    public var textSize:Int = 20;
 
     public inline function new(l:List<Node>) {
         // assign default drawing
@@ -314,6 +315,7 @@ class Graph {
         n.add((drawBezierPoints) ? "1" : "0");
         n.add((drawCenter) ? "1" : "0");
         n.add((drawAngles) ? "1" : "0");
+        n.add("" + textSize);
         result.add(n.join("\x02"));
         // all nodes
         for(node in nodes) {
@@ -410,6 +412,11 @@ class Graph {
             drawBezierPoints = (attrs[4] == "1");
             drawCenter = (attrs[5] == "1");
             drawAngles = (attrs[6] == "1");
+            if(attrs[7] != null) {
+                textSize = Std.parseInt(attrs[7]);
+            } else {
+                textSize = 20;
+            }
         } else {
             drawCircles = (attrs[0] == "1");
             drawCons = (attrs[1] == "1");
@@ -417,6 +424,11 @@ class Graph {
             drawBezierPoints = (attrs[3] == "1");
             drawCenter = (attrs[4] == "1");
             drawAngles = (attrs[5] == "1");
+            if(attrs[7] != null) {
+                textSize = Std.parseInt(attrs[7]);
+            } else {
+                textSize = 20;
+            }
         }
         // restore node style
         for(node in nodes) {
@@ -691,9 +703,11 @@ class Graph {
             }
         }
         if(drawCirclesNames) {
+            result.add("<g font-size=\"" + textSize + "px\" font-family=\"Times\">");
             for(node in nodes) {
                 result.add(node.getNodeNameSvg());
             }
+            result.add("</g>");
         }
         if(drawAngles) {
             for(c1 in cons) {
