@@ -319,12 +319,12 @@ class Graph {
         for(node in nodes) {
             var n:List<String> = new List<String>();
             // save node attributes
-            n.add("" + node.xPos);
-            n.add("" + node.yPos);
-            n.add("" + node.radius);
-            n.add(pieToTxt(node.pie));
-            n.add(node.strokeColor);
-            n.add("" + node.strokeWidth);
+            n.add("" + node.xPos); // 3.933041663665662\u0002
+            n.add("" + node.yPos); // -258.73683021189186\u0002
+            n.add("" + node.radius); // 8.649678077667865\u0002
+            n.add(pieToTxt(node.pie)); // #D06A26\u00011\u0002
+            n.add(node.strokeColor); // black\u0002
+            n.add("" + node.strokeWidth); // 1\u0002
             n.add(node.dashedArray.join("|"));
             // now add to list
             result.add(n.join("\x02"));
@@ -368,7 +368,11 @@ class Graph {
                     if(p == null) {
                         x.add("null");
                     } else {
-                        x.add(p.first + "$" + p.second);
+                        x.add(
+                            ((p.first == null) ? "null" : p.first)
+                            + "$" +
+                            ((p.second == null) ? "null" : "" + p.second)
+                        );
                     }
                 }
                 n.add(x.join("|"));
@@ -477,7 +481,14 @@ class Graph {
                             continue; // nothing to do
                         } else {
                             var first:String = f.split("$")[0];
-                            var second:Int = Std.parseInt(f.split("$")[1]);
+                            if (first == "null" || first == "") {
+                                first = null;
+                            }
+                            var secondStr = f.split("$")[1];
+                            var second:Null<Int> = null;
+                            if (!(secondStr == "null" || secondStr == "")) {
+                                second = Std.parseInt(f.split("$")[1]);
+                            }
                             var p:Pair<String,Int> = new Pair<String,Int>(first, second);
                             link.strokeColorList.add(p);
                         }
