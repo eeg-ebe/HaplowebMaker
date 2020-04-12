@@ -508,11 +508,11 @@ class Graph {
             link.w = Std.parseFloat(attrs[0]);
             link.strokeColor = attrs[1];
             if (saveVersion == 1) {
-                if (attrs[3] == "null") {
+                if (attrs[2] == "null") {
                     link.strokeColorList = null;
                 } else {
                     link.strokeColorList = new List<Pair<String,Int>>();
-                    for(f in attrs[3].split("|")) {
+                    for(f in attrs[2].split("|")) {
                         if (f == "null") {
                             link.strokeColorList.add(null);
                         } else if(f == "" || f == null) {
