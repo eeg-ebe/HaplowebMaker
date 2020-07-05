@@ -3,11 +3,11 @@ HaplowebMaker creates automatically haplowebs (Flot et al. 2010) starting from F
 
 # Installation
 
-// TODO
+Just copy / paste this folder to a webserver.
 
 # Usage
 
-// TODO
+Open http(s)://<name of your webbrowser>/<directory>/index.html in any modern browser that fully supports HTML 5.
 
 # Relevant papers
 Bandelt, Forster & Röhl (1999) Median-joining networks for inferring intraspecific phylogenies. Molecular biology and evolution 16:37-48
