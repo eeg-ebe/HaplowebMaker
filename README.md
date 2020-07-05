@@ -5,6 +5,11 @@ HaplowebMaker creates automatically haplowebs (Flot et al. 2010) starting from F
 
 Just copy / paste this folder to a webserver.
 
+If you want to use HaplowebMaker offline, either install a local webserver (recommended) or activate CORS requests so that the HaplowebMaker website can load it's resources in the corresponding subdirectories
+(This is not recommended as this has some security implications).
+
+In order to activate CORS requests in Firefox, enter about:config as URL, accept the warning message and set the setting "privacy.file_unique_origin" to false.
+
 # Usage
 
 Open http(s)://&lt;name of your webbrowser&gt;/&lt;directory&gt;/index.html in any modern browser that fully supports HTML 5.
