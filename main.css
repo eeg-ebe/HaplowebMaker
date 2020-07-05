@@ -1,0 +1,240 @@
+* {
+    padding: 0px;
+    margin: 0px;
+    font-family: Tahoma, Verdana, Arial, sans-serif;
+/*
+    font-size: 12.5px;
+    color: black;
+*/
+}
+
+body {
+    margin: 0 auto;
+}
+
+#banner {
+    z-index: 50;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: black;
+}
+#bannerSpace {
+    height: 65px;    
+}
+
+#mainToolsOpener {
+    text-decoration: none;
+    color: lightgray;
+    font: italic 32px Verdana;
+    cursor: pointer;
+}
+#mainToolsToolbox {
+    display: none;
+    position: fixed;
+    z-index: 52;
+    width: 250px;
+    top: 62px;
+    left: 5px;
+}
+
+#logoImg {
+    vertical-align: middle;
+    height: 40;
+    width: 40px;
+}
+
+#invisibleHelperObjects {
+    display: none;
+}
+
+.imgInSpan {
+    background-repeat:no-repeat;
+    background-position: center center;
+    background-size: 100%;
+}
+
+.dataContentTable {
+    width: 100%;
+    margin-top: 15px;
+    padding: 3px;
+    border-collapse: collapse;
+}
+.dataContentTable th {
+    border: 0px solid #ddd;
+    padding: 8px;
+}
+.dataContentTable td {
+    border: 0px solid #ddd;
+    padding: 8px;
+}
+.dataContentTable .header {
+    background: #f6a828;
+}
+.dataContentTable .even {
+    background-color: white;
+}
+.dataContentTable .even:hover {
+    background-color: #ffffcc;
+}
+.dataContentTable .odd {
+    background-color: #f2f2f2;
+}
+.dataContentTable .odd:hover {
+    background-color: #ffffcc;
+}
+.dataContentTable .left {
+    text-align: left;
+}
+.dataContentTable .middle {
+    text-align: center;
+}
+.dataContentTable .right {
+    text-align: right;
+}
+
+/* Thks to http://stackoverflow.com/questions/7059394/how-to-position-a-table-at-the-center-of-div-horizentally-vertically */
+.centerEverythingWrapper {
+    position: absolute;
+    left: 50%; top: 50%; /*move the object to the center of the parent object*/
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    /*these 5 settings change the base (or registration) point of the wrapper object to it's own center - so we align child center with parent center*/
+}
+
+#jobSubmissionTable {
+    width: 100%;
+    border: 1px solid black;
+    overflow: hidden;
+    padding: 7px;
+    background-color: white;
+}
+#jobSubmissionTable td {
+    padding-top: 7px;
+}
+#jobSubmissionButton {
+    right: 3px;
+}
+
+.advancedSettings {
+    display: none;
+}
+
+#jobNameH1 {
+    float: left;
+    margin: 1px;
+}
+#jobNameLine {
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+#editJobNameButton {
+    margin: 1px;
+}
+#sortable {
+    overflow: hidden;
+    padding-bottom: 12px;
+}
+.floater {
+    margin: 15px 7px -3px 0px;
+    padding: 0.4em 1em;
+    float: left
+}
+.right {
+    text-align: right;
+}
+.activeProgressbar {
+    background: #f6a828 url("data:image/gif;base64,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") repeat scroll 0 0;
+    border: 1px solid #e78f08;
+    color: #fff;
+    font-weight: bold;
+}
+.activeProgressbarLabel {
+    position: absolute;
+    width: 100%;
+    padding: 7px;
+    text-align: center;
+    vertical-align: middle;
+    z-index: 102;
+    color: #1c94c4;
+    font-weight: bold;
+}
+.activeProgressbarLabel span {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #ccc;
+    padding: 2px;
+}
+.ui-dialog-titlebar a {
+    float: right;
+    text-decoration: none;
+}
+.wait {
+    color: black;
+}
+.ok {
+    color: green;
+}
+.failed {
+    color: red;
+    font-weight: bold;
+}
+.run {
+    color: #f6a828;
+    font-weight: bold;
+}
+#fileTable {
+    width: 100%;
+    margin-top: 15px;
+    padding: 3px;
+    border-collapse: collapse;
+}
+#fileTable th {
+    border: 0px solid #ddd;
+    padding: 8px;
+}
+#fileTable td {
+    border: 0px solid #ddd;
+    padding: 8px;
+}
+#fileTable .header {
+    background: #f6a828;
+}
+#fileTable .even {
+    background-color: white;
+}
+#fileTable .even:hover {
+    background-color: #ffffcc;
+}
+#fileTable .odd {
+    background-color: #f2f2f2;
+}
+#fileTable .odd:hover {
+    background-color: #ffffcc;
+}
+#fileTable .left {
+    text-align: left;
+}
+#fileTable .middle {
+    text-align: center;
+}
+#fileTable .right {
+    text-align: right;
+}
+a.anchor {
+    display: block;
+    position: relative;
+    top: -70px;
+    visibility: hidden;
+}
+.mirror {
+    display: block; 
+    -webkit-transform: matrix(-1, 0, 0, 1, 0, 0);
+    -moz-transform: matrix(-1, 0, 0, 1, 0, 0);
+    -o-transform: matrix(-1, 0, 0, 1, 0, 0);
+    transform: matrix(-1, 0, 0, 1, 0, 0);
+}

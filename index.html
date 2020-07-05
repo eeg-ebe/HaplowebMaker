@@ -1,0 +1,1533 @@
+<!Doctype html public>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="referrer" content="no-referrer" />
+        <link rel="shortcut icon" type="image/png" href="images/favicon.svg"/>
+        <title>HaplowebMaker</title>
+        <link rel="stylesheet" href="main.css"/>
+        <link rel="stylesheet" href="external/jquery-ui.min.css"/>
+<!--
+        <script>
+            window.onerror = function(msg, url, line, col, error) {
+                var extra = !col ? '' : '\ncolumn: ' + col;
+                extra += !error ? '' : '\nerror: ' + error;
+                extra += !navigator.userAgent ? '' : "\nUserAgent: " + navigator.userAgent;
+                alert("Ooops, this should not happen!\n\nAn unexpected error occured!\nPlease report the following information to the authors of this program, so that this error can get fixed:\n\nError: " + msg + "\nurl: " + url + "\nline: " + line + extra);
+            }
+        </script>
+-->
+        <script src="external/FileSaver.min.js"></script>
+        <script src="external/jquery.js"></script>
+        <script src="external/moment.min.js"></script>
+        <script src="external/jquery-ui.min.js"></script>
+        <script src="external/jszip.js"></script>
+        <script src="scripts/util.js"></script>
+        <script src="scripts/LstExtractor.js"></script>
+        <script src="scripts/Drawing.js"></script>
+        <style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+        <script>
+            block = false;
+            // load shortcuts
+            shortcuts = {};
+            $.getJSON("shortcuts.json", function(data) {
+                shortcuts = data;
+            });
+            // load the available languages
+            loadLanguages();
+            // parse the uri
+            urlParams = parseUrl();
+            // check in which language the site should get displayed;
+            language = 'en'; // fallback: english
+            /*
+            var browserLang = navigator.browserLanguage || navigator.language; // check if the language of the browser is among the supported languages => if yes, use it
+            browserLang = browserLang.split("-")[0].toLowerCase();
+            if(typeof languageDicts[browserLang] != "undefined") {
+                language = browserLang;
+            }*/
+            if(typeof urlParams["lang"] != "undefined") { // uri parameter overwrites fallback language
+                if(typeof languageDicts[urlParams["lang"]] != "undefined") {
+                    // ok, a language parameter was given via uri -> use this language instead
+                    language = urlParams["lang"].toLowerCase();
+                } else {
+                    console.log("WARNING: language '" + urlParams['lang'] + "' not found!");
+                }
+            }
+            // create a new empty project
+            project = {};
+            // the worker
+            worker = new Worker("scripts/worker.js");
+            // some settings
+            timeformat = 'YYYY-MM-DD, HH:mm:ss:SSS';
+            if(typeof urlParams["timeformat"] != "undefined") {
+                timeformat = urlParams["timeformat"];
+            }
+            colorSamePos = 'blue';
+            if(typeof urlParams["colorSamePos"] != "undefined") {
+                colorSamePos = urlParams["colorSamePos"];
+            }
+            colorDifPos = 'yellow';
+            if(typeof urlParams["colorDifPos"] != "undefined") {
+                colorDifPos = urlParams["colorDifPos"];
+            }
+            
+            openEditCircleDialog = null; // last opened circle dialog
+        </script>
+    </head>
+    <body>
+        <a name="top" class="anchor"></a>
+        <div id="calculationOverlay" class="ui-widget-overlay ui-front">
+            <div class="centerEverythingWrapper">
+                <img src="images/loading.gif" class="ui-front"/>
+            </div>
+        </div>
+        <div id="modalOverlay" class="ui-widget-overlay ui-front">
+        </div>
+        <div id="banner">
+            <div style="padding: 10">
+                <a id="mainToolsOpener" class="tooltip shortcut" shortcut="openMainToolsToolbox" onclick="javascript: $('#mainToolsToolbox').toggle();">
+                    <img id="logoImg" src="images/logo.svg" />
+                    <span style="vertical-align: middle; height: 40; font: italic 32px Verdana; text-decoration: none; color: lightgray;">&nbsp;HaplowebMaker</span>
+                </a>
+            </div>
+        </div>
+        <div id="bannerSpace"></div>
+        <ul id="mainToolsToolbox" class="ui-border-all">
+            <li>
+                <div class="shortcut" shortcut="newInstance" onclick="javascript: openNewInstance();">
+                    <span class="ui-icon ui-icon-plus"></span><span class="label tooltip" lid="newInstance.label"></span>
+                </div>
+            </li>
+            <li>
+                <div class="shortcut" shortcut="loadProject" onclick="javascript: loadProject();">
+                    <span class="ui-icon ui-icon-folder-open"></span><span class="label tooltip" lid="loadProject.label"></span>
+                </div>
+            </li>
+            <li>
+                <div id="saveProjectDiv" class="shortcut ui-state-disabled" shortcut="saveProject" onclick="javascript: saveProject();">
+                    <span class="ui-icon ui-icon-disk"></span><span class="label tooltip" lid="saveProject.label"></span>
+                </div>
+            </li><!--
+            <li>
+                <div>
+                    <span class="ui-icon ui-icon-arrow-4-diag"></span>
+                    <span class="label tooltip" lid="navigation.label" tid="navigation.title"></span>
+                </div>
+                <ul>
+                    <li>
+                        <div class="shortcut" shortcut="scrollUp" onclick="javascript: scrollUp();">
+                            <span class="ui-icon ui-icon-arrowstop-1-n"></span><span class="label tooltip" lid="scrollUp.label" tid="scrollUp.title"></span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="shortcut" shortcut="scrollDown" onclick="javascript: scrollDown();">
+                            <span class="ui-icon ui-icon-arrowstop-1-s"></span><span class="label tooltip" lid="scrollDown.label" tid="scrollDown.title"></span>
+                        </div>
+                    </li>
+                </ul>
+            </li>--><!--
+            <li>
+                <div>
+                    <span class="ui-icon ui-icon-comment"></span>
+                    <span class="label tooltip" lid="language.label" tid="language.title"></span>
+                </div>
+                <ul>
+                    <script>
+                        for(key in {"en":""}) {
+                            document.write("<li><div onclick=\"javascript: setLanguage('" + key + "');\"><span class=\"ui-icon imgInSpan\" style=\"background-image:url('languages/" + languageDicts[key]["flag_path"] + "')\"></span>" + languageDicts[key]["lang_long"] + "</div></li>");
+                        }
+                    </script>
+                </ul>
+            </li>-->
+            <li>
+                <div>
+                    <span class="ui-icon ui-icon-note"></span>
+                    <span class="label tooltip" lid="documentation.label" tid="documentation.title"></span>
+                </div>
+                <ul>
+                    <!-- TODO: documentation, impressum -->
+                    <li>
+                        <div class="shortcut" shortcut="cite" onclick="javascript: showCite();">
+                            <span class="ui-icon ui-icon-star"></span>
+                            <span class="label tooltip" lid="cite.label"></span>
+                        </div>
+                    </li>
+                    <li>
+                        <div id="videoDiv" onclick="javascript: document.getElementById('videoLink').click();">
+                            <a id="videoLink" target="_blank" href="https://youtu.be/aFIlv7L0k8Q" style="text-decoration: none;">
+                            </a>
+                            <span class="ui-icon ui-icon-video"></span>Introduction Video</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="shortcut" shortcut="contact" onclick="javascript: window.location='mailto: Yann Spöri <ga29qal@mytum.de>,Jean-François Flot <jflot@ulb.ac.be>?subject=[HaplowebMaker/CoMa]'">
+                            <span class="ui-icon ui-icon-contact"></span>
+                            <span class="label tooltip" lid="contact.label"></span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="shortcut" shortcut="usedSoftware" onclick="javascript: showUsedSoftware();">
+                            <span class="ui-icon ui-icon-link"></span>
+                            <span class="label tooltip" lid="usedSoftware.label"></span>
+                        </div>
+                    </li>
+                    <li>
+                        <div id="faqDiv" onclick="javascript: document.getElementById('faqLink').click();">
+                            <a id="faqLink" target="_blank" href="faq.html" style="text-decoration: none;">
+                            </a>
+                            <span class="ui-icon ui-icon-help"></span>FAQ</span>
+                        </div>
+                    </li>
+                </ul>
+            </li>            
+            <li>
+                <div class="shortcut" shortcut="configureShortcuts" onclick="javascript: configureShortcuts();">
+                    <span class="ui-icon ui-icon-gear"></span><span class="label tooltip" lid="configureShortcuts.label"></span>
+                </div>
+            </li>
+        </ul>
+        <a href="https://github.com/eeg-ebe/eeg-ebe.github.io">
+            <svg width="80" height="80" viewBox="0 0 250 250" style="fill:white; color:black; z-index: 51; position: absolute; top: 0; right: 0; border: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg>
+        </a>
+
+        <!-- Main content start -->
+
+        <div id="submitNewSequencesDiv" class="centerEverythingWrapper" style="width: 50.0%;">
+            <img src="images/bg.svg"/ style="z-index: -1">
+            <table id="jobSubmissionTable" class="ui-corner-all">
+                <tr class="tooltip" tid="jobSubmissionJobName.title">
+                    <td class="label" lid="jobSubmissionJobName.label"></td>
+                    <td style="text-align: right"><input type="text" id="jobname" name="jobname" autocomplete="off" /></td>
+                </tr>
+                <tr class="tooltip" tid="jobSubmissionFasta.title">
+                    <td class="label" lid="jobSubmissionFasta.label"></td>
+                    <td style="text-align: right"><input type="file" id="faAlign" name="faAlign" multiple="" autocomplete="off" /></td>
+                </tr>
+                <tr class="tooltip" tid="jobSubmissionAdvancedSettingsDelimiter.title">
+                    <td class="label" lid="jobSubmissionAdvancedSettingsDelimiter.label"></td>
+                    <td style="text-align: right">
+                        <select id="delimiterChoosing" autocomplete="off">
+                            <option>_</option>
+                            <option>.</option>
+                            <option>:</option>
+                            <option>,</option>
+                            <option>;</option>
+                            <option>/</option>
+                            <option>\</option>
+                            <option>%</option>
+                            <option>$</option>
+                            <option>-</option>
+                            <option> </option>
+                            <option>^</option>
+                            <option>+</option>
+                            <option>#</option>
+                            <option>?</option>
+                            <option>~</option>
+                            <option>*</option>
+                            <option>!</option>
+                            <option>§</option>
+                            <option>&amp;</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td onclick="javascript: $('.advancedSettings').toggle(); $('#advancedSettingsIcon').toggleClass('ui-icon-triangle-1-e ui-icon-triangle-1-s');" style="cursor:pointer"><span id="advancedSettingsIcon" class="ui-icon ui-icon-triangle-1-e"></span><span class="label" lid="jobSubmissionAdvancedSettings.label"></span></td>
+                    <td></td>
+                </tr>
+                <tr class="advancedSettings tooltip" tid="jobSubmissionAdvancedSettingsMJFasta.title" style="visibility: collapse">
+                    <td class="label" lid="jobSubmissionAdvancedSettingsMJFasta.label"></td>
+                    <td style="text-align: right"><input type="checkbox" name="ignoreUpperLowerName" id="ignoreUpperLowerName" autocomplete="off" />(name)</td>
+                </tr>
+                <tr class="advancedSettings tooltip" tid="jobSubmissionAdvancedSettingsMJFasta.title" style="visibility: collapse">
+                    <td class="label" lid="jobSubmissionAdvancedSettingsMJFasta.label"></td>
+                    <td style="text-align: right"><input type="checkbox" name="ignoreUpperLowerSeq" id="ignoreUpperLowerSeq" checked="cheched" autocomplete="off" disabled="disabled" />(seq)</td>
+                </tr>
+                <tr class="advancedSettings tooltip" tid="repIndels.title">
+                    <td class="label" lid="repIndels.label"></td>
+                    <td style="text-align: right">
+                        <select id="repIndels" autocomplete="off">
+                            <option>5th character</option>
+                            <option>missing data</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr class="advancedSettings">
+                    <td>In case of ambiguous characters</td>
+                    <td style="text-align: right">
+                        <select id="ambigStrat" autocomplete="off">
+                            <option>error</option>
+                            <option>mask</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr class="advancedSettings tooltip" tid="networkCreationAlgo.title">
+                    <td class="label" lid="networkCreationAlgo.label"></td>
+                    <td style="text-align: right">
+                        <select id="onlyMinimumSpanningNetwork" autocomplete="off">
+                            <option>median joining</option>
+                            <option>minimum spanning network</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr class="advancedSettings tooltip" tid="jobSubmissionAdvancedSettingsMJEpsilon.title">
+                    <td class="label" lid="jobSubmissionAdvancedSettingsMJEpsilon.label"></td>
+                    <td style="text-align: right;"><input id="epsilon" name="value" value="0.0" autocomplete="off" style="padding: 0 !important; margin: 0 !important" />
+                        <script>
+                            $("#epsilon").spinner({
+                                step: 0.1,
+                                spin: function( event, ui ) {
+                                    if ( ui.value < 0 ) {
+                                        $( this ).spinner( "value", 0.0 );
+                                        return false;
+                                    }
+                                }
+                            });
+                        </script>
+                    </td>
+                </tr>
+                <tr class="advancedSettings">
+                    <td colspan="2">Circle <select id="areaShouldBePropToNrInd" autocomplete="off">
+                            <option>area</option>
+                            <option>radius</option>
+                            <option>const</option>
+                        </select> and curve thickness <select id="frequency" autocomplete="off">
+                            <option>proportional to number of individuals</option>
+                            <option>proportional to inferred frequencies</option>
+                            <option>proportional to number of occurrences in input files</option>
+                        </select></td>
+                </tr>
+<!--                <tr class="advancedSettings">
+                    <td>Haplotype circle reflect</td>
+                    <td style="text-align: right">
+                        
+                    </td>
+                </tr>
+                <tr class="advancedSettings tooltip" tid="areaShouldBePropToNrInd.title">
+                    <td class="label" lid="areaShouldBePropToNrInd.label"></td>
+                    <td style="text-align: right">
+                        
+<!--                        <input type="checkbox" name="areaShouldBePropToNrInd" id="areaShouldBePropToNrInd" autocomplete="off" />
+                    </td>
+                </tr>--><!--
+                <tr class="advancedSettings tooltip" tid="pieChartAdvSet.title">
+                    <td class="label" lid="pieChartAdvSet.label"></td>
+                    
+                </tr>-->
+                <tr class="advancedSettings tooltip" tid="pieChartsByIndNameOnly.title">
+                    <td>Color file&nbsp;&nbsp;<select id="pieByIndNameOnly" autocomplete="off">
+                        <option>attributing colors to individuals</option>
+                        <option>attributing colors to individual sequences</option>
+                    </select></td>
+                    <td style="text-align: right"><input type="file" id="pieFile" name="pieFile" autocomplete="off" /></td>
+                    <!--
+                    <td class="label" lid="pieChartsByIndNameOnly.label"></td>
+                    <td style="text-align: right"><input type="checkbox" name="pieByIndNameOnly" id="pieByIndNameOnly" checked="cheched" autocomplete="off" /></td>
+                    -->
+                </tr>
+                <tr class="advancedSettings tooltip" tid="colorByFFR.title">
+                    <td class="label" lid="colorByFFR.label"></td>
+                    <td style="text-align: right"><input type="checkbox" name="colorByFFR" id="colorByFFR" checked="cheched" autocomplete="off" /></td>
+                </tr>
+                <tr class="advancedSettings tooltip" tid="onlyComa.title">
+                    <td class="label" lid="onlyComa.label"></td>
+                    <td style="text-align: right"><input type="checkbox" name="onlyComa" id="onlyComa" autocomplete="off" /></td>
+                </tr>
+                <!--
+                <tr class="advancedSettings tooltip" tid="multiColorLinks.title">
+                    <td class="label" lid="multiColorLinks.label"></td>
+                    <td style="text-align: right"><input type="checkbox" name="multiColorLinks" id="multiColorLinks" checked="cheched" autocomplete="off" /></td>
+                </tr>-->
+                <tr class="advancedSettings tooltip" tid="removeSingletons.title">
+                    <td class="label" lid="removeSingletons.label"></td>
+                    <td style="text-align: right"><input type="checkbox" name="removeSingletons" id="removeSingletons" autocomplete="off" /></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td style="text-align: right"><button id="jobSubmissionButton" class="ui-button ui-widget ui-corner-all shortcut label tooltip" shortcut="jobsubmission" lid="jobSubmissionButton.label" tid="jobSubmissionButton.title" onclick="javascript: addNewSequencesToProject();"></button></td>
+                </tr>
+            </table>
+            <div style="font-size: 75%; padding: 5px">
+                <span class="label" lid="jobSubmissionJobNameExp.label"></span><br/>
+                <span class="label" lid="jobSubmissionFastaExp.label"></span> [<a class="label" lid="exemplaryFastaFileDownloadLink.label" href="examples.zip"></a>]
+            </div>
+        </div>
+        <div id="projectShowBox" style="display: none; padding: 15px">
+            
+        </div>
+
+        <!-- Main content end -->
+
+        <div id="genericInfoDialog">
+            <p>
+                <span class="ui-icon ui-icon-info" style="float:left;margin:0 7px 0 0;"></span>
+                <div id="genericInfoDialogContent" style="margin:0 0 0 23px"></div>
+            </p>
+        </div>
+        <div id="shortcutConfigurationWarningDialog">
+            <p>
+                <span class="ui-icon ui-icon-alert" style="float:left;margin:0 7px 50px 0;"></span>
+                <span id="shortcutConfigurationWarningDialogText" class='label' lid='shortcutConfigurationWarningDialogText.label' la0='' la1='' la2=''></span>
+            </p>
+        </div>
+        <div id="shortcutConfigurationDialog" class="tooltip" tid="configureShortcuts.dialog.label">
+            <p style="margin-bottom: 5px;">
+                <input id='availableActionsAutoComplete' class="searchField" autocomplete="off" />
+                <button class="ui-button ui-widget ui-corner-all" style="float:right;" onclick="javascript: downloadShortcuts()">
+                    <span class="ui-icon ui-icon-disk"></span><span class="label" lid="buttonDownload"></span>
+                </button>
+                <input type="file" id="uploadShortcutsFileField" onchange="javascript: uploadShortcuts();" autocomplete="off" style="float:right;" />
+            </p>
+            <div id="shortcutConfigurationDialogContent"></div>
+        </div>
+        <div id="editSVGDialog"><!-- TODO -->
+            <div id="editSVGDialogDim" style="overlow:hidden">
+                <div id="toolboxBar">
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.drawCircles = !currentGraphEdit.drawCircles; updateSVG();">Toggle nodes</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.drawCirclesMedians = !currentGraphEdit.drawCirclesMedians; updateSVG();">Toggle median vectors</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.drawCons = !currentGraphEdit.drawCons; updateSVG();">Toggle edges</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.drawCurves = !currentGraphEdit.drawCurves; updateSVG();">Toggle curves</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.drawBezierPoints = !currentGraphEdit.drawBezierPoints; updateSVG();">Toggle Bézier points</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.drawCenter = !currentGraphEdit.drawCenter; updateSVG();">Toggle center</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.drawAngles = !currentGraphEdit.drawAngles; updateSVG();">Toggle angle</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; if(!currentGraphEdit.drawCirclesNames) { currentGraphEdit.textSize = parseInt(prompt('Text size:', currentGraphEdit.textSize)); }; currentGraphEdit.drawCirclesNames = !currentGraphEdit.drawCirclesNames; updateSVG();">Toggle node name</button>
+                    <button id="loopButton" onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.drawLoops = !currentGraphEdit.drawLoops; updateSVG();">Toggle self-loops</button>
+                    <input id="namesearch" type="text" placeholder="Search sequence name" autocomplete="off">
+                    <br>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.assignRandomNodePos(); stopForce=false; currentGraphEdit.forceDirectedMethod(false, 0.6, 0.5, 500.0, 0.1, 0.1, 1, true); force();">Restart</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.assignRandomNodePos(); updateSVG();">Random</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; stopForce=false; currentGraphEdit.forceDirectedMethod(false, 0.6, 0.5, 500.0, 0.1, 0.1, 1, true); force();">Force</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; stopForce=true">Stop force</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEditstretch *= 9/10; updateSVG();">Zoom out</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; var f=parseFloat(prompt('Please insert zooming factor: (float)').trim()); if(isNaN(f)) { alert('Illegal input'); } else { currentGraphEditstretch *= f; updateSVG(); }">Zoom?</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEditstretch *= 10/9; updateSVG();">Zoom in</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEditstretch = 1; updateSVG();">Reset zoom</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; exportEditSVG('image/png');">Export png</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; exportEditSVGasSVG();">Export svg</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.assignLinkPos(); updateSVG();">Recalc all curves</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.assignLinkPos(false); updateSVG();">Recalc other curves</button>
+<!--
+                    <button onclick="javascript: currentGraphEdit.mult_radius(10/9); updateSVG();">Circles ++</button>
+                    <button onclick="javascript: currentGraphEdit.mult_radius(9/10); updateSVG();">Circles --</button>
+-->
+                    <br>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.rotateN90(); updateSVG();"><span class="ui-icon ui-icon-arrowreturnthick-1-s"></span></button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; var f=parseFloat(prompt('Please insert angle: (float,degree)')); if(isNaN(f)) { alert('Illegal input'); } else {currentGraphEdit.rotate(f / 360 * 2 * Math.PI); updateSVG();}">Rot angle</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.rotateP90(); updateSVG();"><span class="ui-icon ui-icon-arrowreturnthick-1-s mirror"></span></button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.mirrorX(); updateSVG();">Mirror X</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.mirrorY(); updateSVG();">Mirror Y</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.colorNetwork(); updateSVG();">Color according to FFRs</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.modifyLinks(10/9); updateSVG();">Curves++</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.modifyLinks(9/10); updateSVG();">Curves--</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.modifyCons(10/9); updateSVG();">Edges++</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.modifyCons(9/10); updateSVG();">Edges--</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.modifyNodes(10/9); updateSVG();">Nodes++</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.modifyNodes(9/10); updateSVG();">Nodes--</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; currentGraphEdit.initStrokeColorListByStr(project['pieChart'], document.getElementById('ignoreUpperLowerName').checked); updateSVG();">Color curves according to color file</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; if(typeof project['pieChart'] !== 'undefined') { var warning = currentGraphEdit.assingPiesByTxt(project['pieChart'], project['upperLowerCaseN'], project['pieByIndNameOnly']); updateSVG(); if(warning != '') { alert('Missing colors for individual(s) ' + warning); } } else { alert('No color file given!'); }">Color nodes according to color file</button>
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; updateColorFile();">Upload color file</button>
+                    <input type="file" id="updateColorFileUploadInput"/>
+                    <br>
+                    <span>Mutations shown as lines:</span>
+                    <input type="checkbox" name="drawMutsByLineChkbx" id="drawMutsByLineChkbx" autocomplete="off" />
+                    <input type="color" name="drawMutsLineStrokeColor" id="drawMutsLineStrokeColor" value="#000000" autocomplete="off" />
+                    width: <input type="text" name="drawMutsLineStrokeWidth" id="drawMutsLineStrokeWidth" value="3" autocomplete="off" />
+                    length: <input type="text" name="drawMutsLineStrokeSize" id="drawMutsLineStrokeSize" value="10" autocomplete="off" />
+                    <input type="text" name="drawMutsLineStrokeArr" id="drawMutsLineStrokeArr" value="" autocomplete="off" style="visibility: collapse;" />
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; assignMutsLines();">Change</button>
+                    <br>
+                    <span>Mutations shown as text:</span>
+                    <input type="checkbox" name="drawMutsByTextChkbx" id="drawMutsByTextChkbx" autocomplete="off" />
+                    <select name="drawMutsByTextFont" id="drawMutsByTextFont">
+                        <option value="Georgia">Georgia</option>
+                        <option value="Times">Times</option>
+                        <option value="Palatino">Palatino</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Impact">Impact</option>
+                        <option value="Tahoma">Tahoma</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Lucida Console">Lucida Console</option>
+                    </select>
+                    size: <input type="text" name="drawMutsTextSize" id="drawMutsTextSize" value="20" autocomplete="off" />
+                    <input type="color" name="drawMutsTextColor" id="drawMutsTextColor" value="#000000" autocomplete="off" />
+                    offset x: <input type="text" name="drawMutsTextPX" id="drawMutsTextPX" value="0" autocomplete="off" />
+                    offset y: <input type="text" name="drawMutsTextPY" id="drawMutsTextPY" value="0" autocomplete="off" />
+                    <button onclick="javascript: mj_Seq.delimiter = project['delimiter']; assignMutsText();">Change</button><!--
+                    <br>
+                    <span>Mutations shown as dots:</span>
+                    <input type="checkbox" name="drawMutsByDotChkbx" id="drawMutsByDotChkbx" autocomplete="off" />
+                    <input type="text" name="drawMutsDotSize" id="drawMutsDotSize" value="12" autocomplete="off" />
+                    <input type="color" name="drawMutsDotColor" id="drawMutsDotColor" value="#000000" autocomplete="off" />
+                    <input type="text" name="drawMutsDotStrokeArr" id="drawMutsDotStrokeArr" value="" autocomplete="off" />
+                    <button onclick="javascript: assignMutsByDot();">Change</button>-->
+                </div>
+                <div>
+                    <span id="svgDisplay" style="margin: 0; padding: 0"></span>
+                </div>
+            </div>
+        </div>
+        <div id="invisibleHelperObjects">
+            <a id="newInstanceLink" target="_blank"></a>
+            <a id="scrollUpLink" href="#top"></a>
+            <a id="scrollDownLink" href="#bottom"></a>
+            <script>
+                function containsName(names, name) {
+                    var current = names.h;
+                    while (current != null) {
+                        if(name == current.item) {
+                            return true;
+                        }
+                        current = current.next;
+                    }
+                    return false;
+                }
+                function searchSequenceByName(n) {
+                    var nodes = currentGraphEdit.nodes;
+                    var current = nodes.h;
+                    while(current != null) {
+                        var circle = current.item;
+                        if (circle.node.names != null && containsName(circle.node.names, n)) {
+                            console.log("Found in circle " + circle.node.id);
+                            highlightCircle(circle.node.id);
+                            return;
+                        }
+                        current = current.next;
+                    }
+                    console.log("Not found!");
+                    alert("Not found!");
+                }
+                currentHighlight = null;
+                function highlightCircle(n) {
+                    // clear all current circle highlights
+                    if (currentHighlight != null) {
+                        console.log("Currently another highlight is going on");
+                        return;
+                    }
+                    // highlight
+                    var circle = $("#n" + n);
+                    var origR = circle.attr('r');
+                    var origColor = circle.attr('fill');
+                    currentHighlight = setInterval(function() {
+                        var currentRadius = circle.attr('r');
+                        var currentColor = circle.attr('fill');
+                        var newRadius = (currentRadius == origR) ? origR * 8 : origR * 2;
+                        var newColor = (currentColor == 'black') ? 'white' : 'black';
+                        circle.attr("r", newRadius);
+                        circle.attr("fill", newColor);
+                    }, 500);
+                    var f = function() {
+                        try {
+                            clearInterval(currentHighlight);
+                        } catch(e) {
+                            console.log(e);
+                        }
+                        currentHighlight = null;
+                        circle.attr("r", origR);
+                        circle.attr("fill", origColor);
+                    };
+                    setTimeout(f, 5000);
+                }
+                function updateColorFile() { // TODO
+                    var reader = new FileReader();
+                    var input = document.getElementById("updateColorFileUploadInput");
+                    var pieFile = input.files;
+                    if(pieFile.length == 1) {
+                        var reader2 = new FileReader();
+                        reader2.onload = function(data) {
+                            // parse
+                            try {
+                                project["pieChart"] = data.target.result;
+                                if(typeof project["pieChart"] !== "undefined") {
+                                    var warnings = currentGraphEdit.assingPiesByTxt(project["pieChart"], project["upperLowerCaseN"], project["pieByIndNameOnly"]);
+                                    if (warnings != "") {
+                                        alert("Missing colors for individual(s) " + warnings);
+                                    }
+                                } else if(typeof project["assignRandomColoresToFFRs"] !== "undefined" && !!project["assignRandomColoresToFFRs"]) {
+                                    currentGraphEdit.colorNetwork();
+                                } else {
+                                    alert("Missing data!");
+                                }
+                                updateSVG();
+                            } catch (e) {
+                                alert(e);
+                            }
+                        };
+                        reader2.readAsText(pieFile[0]);
+                    } else {
+                        alert("Please select a file first");
+                    }
+                }
+                function assignMutsByDot() {
+                    var chkd = document.getElementById("drawMutsByDotChkbx").checked;
+                    var size = parseFloat(document.getElementById("drawMutsDotSize").value);
+                    var color = document.getElementById("drawMutsDotColor").value;
+                    var arr = [];
+                    var txt = document.getElementById("drawMutsDotStrokeArr").value.split(" ");
+                    for(var i = 0; i < txt.length; i++) {
+                        arr.push(parseFloat(txt[i]));
+                    }
+                    currentGraphEdit.assignButsByDots(chkd, size, color, arr);
+                    updateSVG();
+                }
+                function assignMutsText() {
+                    var chkd = document.getElementById("drawMutsByTextChkbx").checked;
+                    var font = document.getElementById("drawMutsByTextFont").value;
+                    var size = parseFloat(document.getElementById("drawMutsTextSize").value);
+                    var color = document.getElementById("drawMutsTextColor").value;
+                    var px = parseFloat(document.getElementById("drawMutsTextPX").value);
+                    var py = parseFloat(document.getElementById("drawMutsTextPY").value);
+                    currentGraphEdit.assignMutsText(chkd, font, size, color, px, py);
+                    updateSVG();
+                }
+                function assignMutsLines() {
+                    var chkd = document.getElementById("drawMutsByLineChkbx").checked;
+                    var color = document.getElementById("drawMutsLineStrokeColor").value;
+                    var width = parseFloat(document.getElementById("drawMutsLineStrokeWidth").value);
+                    var size = parseFloat(document.getElementById("drawMutsLineStrokeSize").value);
+                    var arr = [];
+                    var txt = document.getElementById("drawMutsLineStrokeArr").value.split(" ");
+                    for(var i = 0; i < txt.length; i++) {
+                        arr.push(parseFloat(txt[i]));
+                    }
+                    currentGraphEdit.assignMutsLines(chkd, color, width, size, arr);
+                    updateSVG();
+                }
+                function exportEditSVG(mime) {
+try {
+                    // get the svg code as Blob
+                    var svg = document.createElement('svg');
+                    svg.innerHTML = currentGraphEdit.getSvgCode();
+                    svg = svg.childNodes[0];
+                    var data = (new XMLSerializer()).serializeToString(svg);
+                    var svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+                    // get the canvas
+                    var myCanvas = document.createElement('canvas');
+                    var myCanvasContext = myCanvas.getContext('2d');
+                    myCanvas.width = svg.getAttribute("width");
+                    myCanvas.height = svg.getAttribute("height");
+                    // draw Blob into image
+                    var DOMURL = window.URL || window.webkitURL || window;
+                    var url = DOMURL.createObjectURL(svgBlob);
+                    var source = new Image();
+                    source.onload = function () {
+try {
+                        myCanvasContext.drawImage(source, 0, 0);
+                        DOMURL.revokeObjectURL(url);
+                        var dataURI = myCanvas.toDataURL(mime);
+                        var filename = "image.png";
+                        $("body").append($("<a id='downloadLink' href-lang='" + mime + "' href='data:" + dataURI + "' title='" + filename + "' style='display:none' download='" + filename + "'>Download</a>"));
+                        document.getElementById('downloadLink').click();
+                        $("#downloadLink").remove();
+} catch(err) { alert("Insufficient memory"); }
+/*
+                        var base64URL = myCanvas.toDataURL(mime);
+                        var win = window.open();
+                        win.document.write('<iframe src="' + base64URL  + '" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>');
+                        win.document.close();
+*/
+//                        window.open('<iframe src="' + myCanvas.toDataURL(mime) + '" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>', '_blank');
+                    };
+                    source.src = url;
+} catch(err) { alert("Insufficient memory"); }
+                }
+                function exportEditSVGasSVG() {
+                    download("image/svg+xml", "image.svg", currentGraphEdit.getSvgCode());
+                }
+                function force() {
+                    var tE = currentGraphEdit.forceDirectedMethod(false, 0.6, 0.5, 500.0, 0.1, 0.1, 1, false);
+                    currentGraphEdit.centerPos();
+                    currentGraphEdit.assignLinkPos();
+                    updateSVG();
+                    if(tE > 0.5 && !stopForce) {
+                        window.setTimeout(force, 10);
+                    }
+                }
+                function getClickX(event) {
+                    var offset = $("#svgDisplay svg").offset();
+                    var x = event.pageX - offset.left;
+                    return x / currentGraphEdit.lastStretchFact;
+                }
+                function getClickY(event) {
+                    var offset = $("#svgDisplay svg").offset();
+                    var y = event.pageY - offset.top;
+                    return y / currentGraphEdit.lastStretchFact;
+                }
+                function editMouseMove(event) {
+                    if (block) {
+                        return;
+                    }
+                    if(event.which == 3) {
+                        selectedObj = null; // just to be sure ...
+                        return;
+                    }
+                    if(selectedObj != null) {
+                        selectedObj.set_xPos(initObjX + getClickX(event) - initX);
+                        selectedObj.set_yPos(initObjY + getClickY(event) - initY);
+                        updateSVG();
+                    }
+                }
+                function editMouseUp(event) {
+                    if (block) {
+                        return;
+                    }
+                    if(event.which == 3) {
+                        selectedObj = null; // just to be sure ...
+                        return;
+                    }
+                    if('setByUser' in selectedObj) {
+                        selectedObj.setByUser = true;
+                    }
+                    selectedObj = null;
+                }
+                function editMouseDown(event) {
+                    if (block) {
+                        return;
+                    }
+                    initX = getClickX(event);
+                    initY = getClickY(event);
+                    selectedObj = currentGraphEdit.getNearestO(initX, initY);
+                    if(event.which == 3) { // jquery maps event.button == 2 to event.which == 3
+                        block = true;
+                        $( document ).ready(function() {
+                            try {
+                                showDetailsMenu(selectedObj);
+                                selectedObj = null; // just to be sure ...
+                            } finally {
+                                setTimeout(function() {
+                                    block = false;
+                                }, 700);
+                            }
+                        });
+                        return;
+                    }
+                    initObjX = selectedObj.xPos;
+                    initObjY = selectedObj.yPos;
+                }
+                function removePreviousCircleDialogs() {
+                    if(openEditCircleDialog != null) {
+                        $( '#' + openEditCircleDialog ).dialog("moveToTop");
+                        $( '#' + openEditCircleDialog ).dialog("close");
+                        $( '#' + openEditCircleDialog ).remove();
+                    }
+                    openEditCircleDialog = null;
+                }
+                function showDetailsMenu(obj) {
+                    if('pie' in selectedObj) { // obj is a nodepos object
+                        removePreviousCircleDialogs();
+                        setTimeout(function() {
+                            var nodeId = "editObjCirlce" + obj.node.id + "Dialog";
+                            openEditCircleDialog = nodeId;
+                            $("body").append($("<div id='" + nodeId + "'>" + obj.getDivContent() + "</div>"));
+                            $( '#' + nodeId ).dialog({
+                                modal: true,
+                                autoOpen: false,
+                                buttons: [ {
+                                    "text" : languageDicts[language]["dict"]["buttonOk"],
+                                    "class" : "dialogOkButton",
+                                    "click" : function() {
+                                        $( document ).ready(function() {
+                                            removePreviousCircleDialogs();
+                                        });
+                                    }
+                                }],
+                                open: function(event, ui) {
+                                    $(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
+                                }
+                            });
+                            $( '#' + nodeId ).dialog('option', 'title', "INFO"); // TODO languageDicts[language]["dict"]["cite.label"]
+                            $( '#' + nodeId ).dialog("open");
+                            // hack in order to bring this dialog to the front
+                            setTimeout( function() {
+                                $( '#' + nodeId ).dialog('moveToTop');
+                                $( '#' + nodeId ).dialog("widget").position({ of : $("#editSVGDialog"), collision : "none" });;
+                            }, 120);
+                        }, 100);
+                    }
+                }
+                function updateSVG() {
+                    var svgDisp = document.getElementById("svgDisplay");
+                    var dialog = document.getElementById("editSVGDialog");
+                    var w = dialog.clientWidth;
+                    var h = dialog.clientHeight - document.getElementById("toolboxBar").clientHeight;
+                    svgDisp.innerHTML = currentGraphEdit.getSvgCode( w * currentGraphEditstretch, h * currentGraphEditstretch );
+                    var svg = svgDisp.childNodes[0];
+                    svg.addEventListener("mousemove", editMouseMove);
+                    svg.addEventListener("mouseup", editMouseUp);
+                    svg.addEventListener("mousedown", editMouseDown);
+                    $(svg).bind("contextmenu", function(e) {e.preventDefault();});
+                }
+                function visualizeIntPos(i) {
+                    var positions = project["faFiles"][i]["intPos"], seqLen = project["faFiles"][i]["seqLen"];
+                    var imgWidth = seqLen * 16;
+                    console.log(positions, seqLen);
+                    var data = "<svg version='1.1' baseProfile='full' width='" + imgWidth + "' height='10' xmlns='http://www.w3.org/2000/svg'><rect x='0' y='0' width='" + imgWidth + "' height='10' style='fill:" + colorSamePos + "'/>";
+                    var current = positions.h;
+                    while(current != null && current != undefined) {
+                        data += "<rect x='" + (current.item * 16) + "' y='0' width='16' height='10' fill='" + colorDifPos + "'/>";
+                        current = current.next;
+                    }
+                    data += "</svg>";
+                    showVizualization(data);
+                }
+                function showCite() {
+                    $("#calculationOverlay").show();
+                    $.getJSON("cite.json", function(data) {
+                        var dialog = $("#genericInfoDialog");
+                        dialog.dialog('option', 'title', languageDicts[language]["dict"]["cite.label"]);
+                        var html = "";
+                        for(var id=0; id < data.length; id++) {
+                            var paper = data[id];
+                            html += "<div style='margin-bottom: 7px'><span class='ui-icon ui-icon-triangle-1-e'></span>" + paper["ref"] + " [<a href='" + paper["link"] + "'>Link</a>]</div>";
+                        }
+                        $("#genericInfoDialogContent").html(html);
+                        dialog.dialog("open");
+                        $("#calculationOverlay").hide();
+                    });
+                }
+                function showUsedSoftware() {
+                    $("#calculationOverlay").show();
+                    $.getJSON("usedSoftware.json", function(data) {
+                        var dialog = $("#genericInfoDialog");
+                        dialog.dialog('option', 'title', languageDicts[language]["dict"]["usedSoftware.label"]);
+                        var html = "";
+                        for(var id=0; id < data.length; id++) {
+                            var soft = data[id];
+                            html += "<div style='margin-bottom: 7px'><span class='ui-icon ui-icon-triangle-1-e'></span><b>" + soft["name"] + "</b><span style='float:right'>[<a href='" + soft["license"] + "'>License</a>]</span><br>";
+                            for(uid in soft["urls"]) {
+                                var url = soft["urls"][uid];
+                                html += "<a href='" + url + "'>" + url + "</a><br>";
+                            }
+                            html += "</div>";
+                        }
+                        $("#genericInfoDialogContent").html(html);
+                        dialog.dialog("open");
+                        $("#calculationOverlay").hide();
+                    });
+                }
+                function openNewInstance() {
+                    $("#newInstanceLink").attr("href", "index.html?lang=" + language);
+                    document.getElementById("newInstanceLink").click();
+                }
+                function scrollUp() {
+                    document.getElementById("scrollUpLink").click();
+                }
+                function scrollDown() {
+                    document.getElementById("scrollDownLink").click();
+                }
+                function configureShortcuts() {
+                    $( "#shortcutConfigurationDialog" ).dialog("open");
+                }
+                function getNewShortcuts() {
+                    var result = {};
+                    result["actions"] = shortcuts["actions"];
+                    for(var actionNr=0; actionNr < shortcuts["actions"].length; actionNr++) {
+                        var action = shortcuts["actions"][actionNr];
+                        var shortcut = document.getElementById("shortcut" + action + "edit").value;
+                        if(shortcut != "-") {
+                            if(typeof result["_" + shortcut] === "undefined") {
+                                result["_" + shortcut] = action;
+                            } else {
+                                console.log("WARNING: Duplicated shortcut: '_" + shortcut + "'!");
+                                var diag = $( "#shortcutConfigurationWarningDialog" );
+                                diag.dialog('option', 'title', languageDicts[language]["dict"]["configureShortcuts.warningdialog.label"]);
+                                var ele = $("#shortcutConfigurationWarningDialogText");
+                                ele.attr("la0", languageDicts[language]["dict"][action + ".label"]);
+                                ele.attr("la1", languageDicts[language]["dict"][result["_" + shortcut] + ".label"]);
+                                ele.attr("la2", shortcut);
+                                $(".dialogOkButton").text(languageDicts[language]["dict"]["buttonOk"]);
+                                setLanguage(language);
+                                diag.dialog( "open" );
+                                return null;
+                            }
+                        }
+                    }
+                    return result;
+                }
+                function downloadShortcuts() {
+                    var newShortcuts = getNewShortcuts();
+                    if(newShortcuts != null) {
+                        var b64 = window.btoa(JSON.stringify(newShortcuts));
+                        $("body").append($("<a id='downloadLink' href-lang='application/json' href='data:application/json;base64,\n"+b64+"' title='shortcuts.dat' style='display:none' download='shortcuts.dat'>Download</a>"));
+                        document.getElementById('downloadLink').click();
+                        $("#downloadLink").remove();
+                    }
+                }
+                function uploadShortcuts() {
+                    console.log("INFO: Uploading new shortcuts!");
+                    reader = new FileReader();
+                    var files = document.getElementById('uploadShortcutsFileField').files;
+                    for (var i = 0, f; f = files[i]; i++) {
+                        reader.onload = function(data) {
+                            console.log("INFO: shortcut data: " + data.target.result);
+                            shortcuts = JSON.parse(data.target.result);
+                            $( "#shortcutConfigurationDialog" ).dialog("close");
+                        };
+                        reader.readAsText(f);
+                    }
+                }
+                function addNewSequencesToProject() {
+                    // show the calculation panel
+                    $("#calculationOverlay").show();
+                    // get the data that was given!
+                    var files = document.getElementById("faAlign").files;
+                    if(files.length == 0) {
+                        var dialog = $("#genericInfoDialog");
+                        dialog.dialog('option', 'title', languageDicts[language]["dict"]["needAlignments.label"]);
+                        $("#genericInfoDialogContent").text(languageDicts[language]["dict"]["needAlignments.text.label"]);
+                        dialog.dialog("open");
+                        $("#calculationOverlay").hide();
+                        return;
+                    }
+                    project["removeSingletons"] = document.getElementById("removeSingletons").checked
+//XXX                    project["multiColorLinks"] = document.getElementById("multiColorLinks").checked;
+                    project["onlyComa"] = document.getElementById("onlyComa").checked;
+                    if(document.getElementById("repIndels").value == "5th character") {
+                        project["replaceIndelPositions"] = false;
+                    } else {
+                        project["replaceIndelPositions"] = true;
+                    }
+                    project["notifications"] = []; //[ { "ui" : "highlight", "icon" : "info", "text" : "haplowebmakerIsStillBeta.text" } ];
+                    project["projectName"] = document.getElementById("jobname").value;
+                    project["epsilon"] = $( "#epsilon" ).spinner( "value" );
+                    project["delimiter"] = document.getElementById("delimiterChoosing").value;
+                    if(document.getElementById("areaShouldBePropToNrInd").value == "area") {
+                        project["areaShouldBePropToNrInd"] = "Area";
+                    } else if(document.getElementById("areaShouldBePropToNrInd").value == "radius") {
+                        project["areaShouldBePropToNrInd"] = "Radius";
+                    } else if(document.getElementById("areaShouldBePropToNrInd").value == "const") {
+                        project["areaShouldBePropToNrInd"] = "Const";
+                    }
+                    if(document.getElementById("onlyMinimumSpanningNetwork").value == "minimum spanning network") {
+                        project["onlyMinimumSpanningNetwork"] = true;
+                    } else {
+                        project["onlyMinimumSpanningNetwork"] = false;
+                    }
+                    if(document.getElementById("frequency").value == "proportional to number of individuals") {
+document.getElementById("loopButton").disabled = true;
+                        project["frequency"] = "numberOfIndividuals";
+                    } else if(document.getElementById("frequency").value == "proportional to inferred frequencies") {
+                        project["frequency"] = "assumeAtLeastDiploid";
+                    } else {
+                        project["frequency"] = "dont treat";
+                    }
+                    project["upperLowerCaseN"] = document.getElementById("ignoreUpperLowerName").checked;
+                    project["upperLowerCaseS"] = document.getElementById("ignoreUpperLowerSeq").checked;
+                    project["ambigStrat"] = document.getElementById("ambigStrat").value;
+                    project["submissionDate"] = Date.now();
+                    project["calculationEndDate"] = null;
+                    if(document.getElementById("pieByIndNameOnly").value == "attributing colors to individuals") {
+                        project["pieByIndNameOnly"] = true;
+                    } else {
+                        project["pieByIndNameOnly"] = false;
+                    }
+                    project["assignRandomColoresToFFRs"] = document.getElementById("colorByFFR").checked;
+                    project["browser"] = {
+                        "code name" : navigator.appCodeName,
+                        "browser name" : navigator.appName,
+                        "version" : navigator.appVersion,
+                        "browser language" : navigator.language,
+                        "website language" : language,
+                        "platform" : navigator.platform
+                    };
+                    project["faFiles"] = new Array(files.length);
+                    project["progress"] = 0;
+                    for (var i = 0; i < files.length; i++) {
+                        var reader = new FileReader();
+//reader.readAsText(file/blob, 'ISO-8859-1')
+                        reader.file = files[i];
+                        reader.fileId = i;
+                        reader.onload = function(data) {
+                            // add data to project
+                            project["faFiles"][this.fileId] = {
+                                "filename" : this.file.name,
+                                "data" : data.target.result,
+                                "status" : "inqueuestatus.label"
+                            }
+                            // check whether to call the worker
+                            var toCall = true;
+                            for(var i = 0; i < project["faFiles"].length; i++) {
+                                if(project["faFiles"] == undefined || project["faFiles"][i] == null) {
+                                    toCall = false;
+                                    break;
+                                }
+                            }
+                            // call the worker if nec.
+                            if(toCall) {
+                                worker.addEventListener("message", function(e) {
+                                    console.log("INFO: Message from worker: ");
+                                    for(var k = 0; k < e.data.length; k++) {
+                                        var key = e.data[k]["key"];
+                                        var val = e.data[k]["val"];
+                                        console.log("INFO: +", key, val);
+                                        if (key == "warning") {
+                                            project["notifications"].push({ "ui" : "highlight", "icon" : "info", "text" : val });
+                                        } else {
+                                            var obj = project;
+                                            for(var keyi = 0; keyi < key.length - 1; keyi++) {
+                                                obj = obj[key[keyi]];
+                                            }
+                                            obj[key[key.length - 1]] = val;
+                                        }
+                                    }
+                                    showProject();
+                                    $("#calculationOverlay").hide();
+                                }, false);
+                                // check if we also have a pie chart file to read in?
+                                var pieFile = document.getElementById("pieFile").files;
+                                if(pieFile.length == 1) {
+                                    var reader2 = new FileReader();
+                                    reader2.onload = function(data) {
+                                        project["pieChart"] = data.target.result;
+                                        worker.postMessage(project);
+                                    }
+                                    reader2.readAsText(pieFile[0]);
+                                } else { // no we don't have
+                                    worker.postMessage(project);
+                                }
+                            }
+                        };
+                        reader.readAsText(files[i]);
+                    }
+                }
+                function changeProjectByUpload() {
+                    console.log("INFO: Uploading project!");
+                    reader = new FileReader();
+                    var files = document.getElementById('projectUploadFileField').files;
+                    for (var i = 0, f; f = files[i]; i++) {
+                        reader.onload = function(data) {
+                            console.log("INFO: project data: " + data.target.result);
+                            project = JSON.parse(data.target.result);
+                            $( "#genericInfoDialog" ).dialog("close");
+                            mj_Seq.delimiter = project["delimiter"];
+                            // old projects may have a single number in nrDifSeqs, instead of two, here
+                            for(var i = 0; i < project["faFiles"].length; i++) {
+                                if(!isNaN(project["faFiles"][i]["nrDifSeqs"])) {
+                                    project["faFiles"][i]["nrDifSeqs"] = "?+?";
+                                }
+                            }
+                            showProject();
+                        };
+                        reader.readAsText(f);
+                    }
+                }
+                function renameJob() {
+                    var oldName = (typeof project["projectName"] === "undefined" || project["projectName"] == null || project["projectName"] == "") ? "" : project["projectName"];
+                    var newName = prompt(languageDicts[language]["dict"]["askForNewJobName.label"], oldName);
+                    project["projectName"] = newName;
+                    showProject();
+                }
+                function renameAlignment(nr) {
+                    var oldName = project["faFiles"][nr]["filename"];
+                    var newName = prompt(languageDicts[language]["dict"]["askForNewAlignmentName.label"], oldName);
+                    project["faFiles"][nr]["filename"] = newName;
+                    showProject();
+                }
+                function loadProject() {
+                    var dialog = $("#genericInfoDialog");
+                    dialog.dialog('option', 'title', languageDicts[language]["dict"]["loadProject.label"]);
+                    $("#genericInfoDialogContent").html("<input type='file' id='projectUploadFileField' onchange='javascript: changeProjectByUpload()'>");
+                    dialog.dialog("open");
+                }
+                function saveProject() {
+                    var projectJson = JSON.stringify(project);
+                    download("application/json", "project.json", projectJson);
+                }
+                function showProject() {
+                    if(isEmptyDict(project)) {
+                        $("#projectShowBox").hide();
+                        $("#saveProjectDiv").addClass("ui-state-disabled");
+                        $("#jobSubmissionButton").removeClass("ui-state-disabled");
+                        $("#submitNewSequencesDiv").show();
+                        document.title = "HaplowebMaker";
+                    } else {
+                        // ok, show the project
+                        // generalized content
+                        $("#projectShowBox").show();
+                        if(project["progress"] === 100) {  // save is only accessible if calculation finished
+                            $("#saveProjectDiv").removeClass("ui-state-disabled");
+                        } else {
+                            $("#saveProjectDiv").addClass("ui-state-disabled");
+                        }
+                        $("#jobSubmissionButton").addClass("ui-state-disabled");
+                        $("#submitNewSequencesDiv").hide();
+                        // title ... will be set by the setLanguage function
+                        // html -> jobname
+                        var jobname = null;
+                        if(typeof project["projectName"] === "undefined" || project["projectName"] == null || project["projectName"] == "") {
+                            jobname = "<span class='label' lid='emptyProjectName'></span>";
+                        } else {
+                            jobname = project["projectName"].escape();
+                        }
+                        var html = "<div id='jobNameLine' class='tooltip' tid='jobname.title'><h1 id='jobNameH1'>" + jobname + "</h1>&nbsp;&nbsp;&nbsp;<button id='editJobNameButton' onclick='javascript:renameJob();' class='ui-button ui-widget ui-corner-all tooltip' tid='jobname.rename.title'><span class='ui-icon ui-icon-pencil'></span></button></div>";
+                        // html -> notification
+                        for(var i = 0; i < project["notifications"].length; i++) {
+                            var not = project["notifications"][i];
+                            html += generateNotification(not["ui"], not["icon"], not["text"]);
+                        }
+                        // html -> overview + elements
+                        html += "<div id='sortable'>";
+                        html += "<div class='tooltip overview ui-corner-all ui-widget ui-widget-content ui-draggable ui-resizable floater' tid='joboverview.title'><a name='overview' class='anchor'></a><div class='ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix' style='padding: 0.4em 1em; cursor: auto'><span class='ui-dialog-title'><span class='ui-icon ui-icon-home'></span> <span class='label' lid='overviewboxtitle.label'></span></span><a href='#overviewfiles' onclick=\"javascript:$('.overviewfiles').effect('highlight', {color: 'red'}, 1750);\" class='tooltip' tid='jumpToOverviewFiles.title'><span class='ui-icon ui-icon-arrowreturnthick-1-s'></span><span class='label' lid='jumpToOverviewFiles.label'></span></a></div><div id='dialog' class='ui-dialog-content ui-widget-content' style='padding: 0.4em 1em;'><table style='width:100%'><tr class='tooltip' tid='jobname.title'><td><b class='label' lid='jobname.label'></b>&nbsp;&nbsp;&nbsp;&nbsp;<button onclick='javascript:renameJob();' class='ui-button ui-widget ui-corner-all tooltip' tid='jobname.rename.title'><span class='ui-icon ui-icon-pencil'></span></button></td><td>&nbsp;&nbsp;&nbsp;</td><td id='jobnameText' class='right'>";
+                        html += jobname;
+                        html += "</td></tr><tr class='tooltip' tid='uploadtime.title'><td><b class='label' lid='uploadtime.label'></b></td><td></td><td class='right'>";
+                        html += moment(project["submissionDate"]).format(timeformat).escape();
+                        html += "</td></tr><tr class='tooltip' tid='endtime.title'><td><b class='label' lid='endtime.label'></b></td><td></td><td class='right'>";
+                        html += (project["calculationEndDate"] == null) ? "<span class='label' lid='unknown'></span>" : moment(project["calculationEndDate"]).format(timeformat).escape();
+                        html += "</td></tr><tr class='tooltip' tid='nrUploadedFiles.title'><td><b class='label' lid='nrUploadedFiles.label'></b></td><td></td><td class='right'>";
+                        html += project["faFiles"].length;
+                        html += "</td></tr><tr class='tooltip' tid='jobcalculationProcess.title'><td><b class='label' lid='jobcalculationProcess.label'></b></td><td></td><td class='right'>";
+                        if(project["progress"] === 100) {
+                            html += "<span class='label' lid='jobcalculationProcess.finished.label'></span>";
+                        } else {
+                            html += "<div id='progressbar' style='position: relative'><div id='progressbarLabel'><span>" + project["progress"] + "%</span></div></div>";
+                        }
+//epsilon, browser info, description, upperLowerCase
+                        html += "</td></tr></table></div></div>";
+                        for(var i = 0; i < project["faFiles"].length; i++) {
+                            var name = project["faFiles"][i]["filename"].escape();
+                            var status = project["faFiles"][i]["status"];
+                            html += "<div class='alig";
+                            html += i;
+                            html += " ui-corner-all ui-widget ui-widget-content ui-draggable ui-resizable floater tooltip' tid='fileContentView.title' ta0='";
+                            html += name;
+                            html += "'><a name='alig";
+                            html += i;
+                            html += "' class='anchor'></a><div class='ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix' style='padding: 0.4em 1em; font-size: 125%; cursor: auto'><span class='ui-dialog-title'><span class='ui-icon ui-icon-script'></span> ";
+                            html += name;
+                            html += "</span><a href='#alig";
+                            html += i;
+                            html += "files' onclick=\"javascript:$('.alig";
+                            html += i;
+                            html += "files').effect('highlight', {color: 'red'}, 1750);\" class='tooltip' tid='jumpAssociatedAlignmentFiles.title'><span class='ui-icon ui-icon-arrowreturnthick-1-s'></span><span class='label' lid='jumpToAlignementFiles.label'></span></a></div><div id='dialog' class='ui-dialog-content ui-widget-content' style='padding: 0.4em 1em;'><table style='width:100%'><tr class='tooltip' tid='overviewboxesfilename.title'><td><b class='label' lid='overviewboxesfilename.label'></b>&nbsp;&nbsp;&nbsp;&nbsp;<button onclick='javascript:renameAlignment(";
+                            html += i;
+                            html += ");' class='ui-button ui-widget ui-corner-all'><span class='ui-icon ui-icon-pencil'></span></button></td><td>&nbsp;&nbsp;&nbsp;</td><td id='alig%sText' class='right'>";
+                            html += name;
+                            html += "</td></tr><tr class='tooltip' tid='calculationstatus.title'><td><b class='label' lid='calculationstatus.label'></b></td><td></td><td class='right'>";
+                            if(missing(project["faFiles"][i]["statusDescription"])) {
+                                html += "<span class='label' lid='";
+                                html += status;
+                                html += "'></span>";
+                            } else {
+                                html += "<a href='#' onclick='javascript: alert(\"" + project["faFiles"][i]["statusDescription"].escape() + "\")'>";
+                                html += "<span class='label' lid='";
+                                html += status;
+                                html += "'></span></a>";
+                            }
+                            html += "</td></tr><tr class='tooltip' tid='nrSequencesInFile.title'><td><b class='label' lid='nrSequencesInFile.label'></b></td><td></td><td class='right'>";
+                            html += (missing(project["faFiles"][i]["nrSeqs"])) ? "<span class='label' lid='unknown'></span>" : project["faFiles"][i]["nrSeqs"];
+                            html += "</td></tr><tr class='tooltip' tid='nrDifSequencesInFile.title'><td><b class='label' lid='nrDifSequencesInFile.label'></b></td><td></td><td class='right'>";
+                            html += (missing(project["faFiles"][i]["nrDifSeqs"])) ? "<span class='label' lid='unknown'></span>" : project["faFiles"][i]["nrDifSeqs"].split("+")[0];
+                            html += "</td></tr><tr><td><b class='label'>No. of median vectors</b></td><td></td><td class='right'>";
+                            html += (missing(project["faFiles"][i]["nrDifSeqs"])) ? "<span class='label' lid='unknown'></span>" : project["faFiles"][i]["nrDifSeqs"].split("+")[1];
+                            html += "</td></tr><tr class='tooltip' tid='seqLen.title'><td><b class='label' lid='seqLen.label'></b></td><td></td><td class='right'>";
+                            html += (missing(project["faFiles"][i]["seqLen"])) ? "<span class='label' lid='unknown'></span>" : project["faFiles"][i]["seqLen"];
+                            html += "</td></tr><tr class='tooltip' tid='intPos.title'><td><b class='label' lid='intPos.label'></b>&nbsp;&nbsp;&nbsp;&nbsp;<button tid='visualize' onclick='javascript:visualizeIntPos(";
+                            html += i;
+                            html += ");' class='tooltip ";
+                            html += (missing(project["faFiles"][i]["intPos"]) || missing(project["faFiles"][i]["seqLen"])) ? "ui-state-disabled " : "";
+                            html += "ui-button ui-widget ui-corner-all'><span class='ui-icon ui-icon-image'></span></button></td><td></td><td class='right'>";
+                            html += (missing(project["faFiles"][i]["intPos"])) ? "<span class='label' lid='unknown'></span>" : project["faFiles"][i]["intPos"].length;
+                            html += "</td></tr><tr class='tooltip' tid='nbffrs.title'><td><b class='label' lid='nbffrs.label'></b></td><td></td><td class='right'>";
+                            html += (missing(project["faFiles"][i]["ffrs"])) ? "<span class='label' lid='unknown'></span>" : project["faFiles"][i]["ffrs"];
+                            html += "</td></tr><tr class='tooltip' tid='nbinds.title'><td><b class='label' lid='nbinds.label'></b></td><td></td><td class='right'>";
+                            html += (missing(project["faFiles"][i]["inds"])) ? "<span class='label' lid='unknown'></span>" : project["faFiles"][i]["inds"];
+//Size, Hash, nr. lines, nr. sequences, nr. indiv., sequence characters usage, k-mer, nr. differenciating positions, histogram of nr. seqs per ffr ..., time (start, end, used), nr. ffrs, nr. med vect, (graph attrs. like degree distribution, ...), description, sound
+                            html += "</td></tr></table></div></div>";
+                        }
+                        html += "</div>"; // this is the end of the div with the id sortable
+                        // html -> file table
+                        html += "<p></p><table id='fileTable'><tr class='header'><td class='left label' lid='fileTableHeaderName.label'></td><td class='left label' lid='fileTableHeaderAction.label'></td><td class='middle label' lid='fileTableHeaderDesc.label'></td></tr>";
+                        var even = true;
+                        html += "<tr class='" + ((even) ? "even" : "odd") + " overviewfiles'>";
+                        html += "<td class='left'><a name='overviewfiles' class='anchor'></a><a href='#overview' onclick='javascript:$(\".overview\").effect(\"highlight\", {color: \"red\"}, 1750);'><span class='ui-icon ui-icon-arrowreturnthick-1-n'></span></a>";
+                        html += "<span class='label'></span>project.json</td><td class='left'><button class='ui-button ui-widget ui-corner-all' style='visibility: hidden'><span class='ui-icon ui-icon-newwin'></span></button><button class='ui-button ui-widget ui-corner-all tooltip' tid='buttonDownload' onclick='javascript:saveProject();'><span class='ui-icon ui-icon-disk";
+                        html += (project["progress"] === 100) ? "" : " ui-state-disabled";
+                        html += "'></span></button></td><td class='middle'>Complete project in JSON format</td></tr>";
+                        var even = !even;
+                        html += "<tr class='" + ((even) ? "even" : "odd") + " overviewfiles'>";
+                        html += "<td class='left'><a name='overviewfiles' class='anchor'></a><a href='#overview' onclick='javascript:$(\".overview\").effect(\"highlight\", {color: \"red\"}, 1750);' class='tooltip' tid='jumpOverview.title'><span class='ui-icon ui-icon-arrowreturnthick-1-n'></span></a>";
+                        html += "<span class='label' lid='allFilesZip.label'></span></td><td class='left'><button class='ui-button ui-widget ui-corner-all' style='visibility: hidden'><span class='ui-icon ui-icon-newwin'></span></button><button class='ui-button ui-widget ui-corner-all tooltip' tid='buttonDownload' onclick='javascript:downloadEverything();'><span class='ui-icon ui-icon-disk";
+                        html += (project["progress"] === 100) ? "" : " ui-state-disabled";
+                        html += "'></span></button></td><td class='middle label' lid='allFilesZipDesc.label'></td></tr>";
+                        var even = !even;
+                        html += "<tr class='" + ((even) ? "even" : "odd") + " overviewfiles'>";
+                        html += "<td class='left'><a name='overviewfiles' class='anchor'></a><a href='#overview' onclick='javascript:$(\".overview\").effect(\"highlight\", {color: \"red\"}, 1750);' class='tooltip' tid='jumpOverview.title'><span class='ui-icon ui-icon-arrowreturnthick-1-n'></span></a>";
+                        html += "<span class='label' lid='coma.label'></span></td><td class='left'><button class='ui-button ui-widget ui-corner-all tooltip' tid='buttonView' onclick='javascript:viewComa();'><span class='ui-icon ui-icon-newwin";
+                        html += (project["progress"] === 100) ? "" : " ui-state-disabled";
+                        html += "'></span></button><button class='ui-button ui-widget ui-corner-all tooltip' tid='buttonDownload' onclick='javascript:downloadComa();'><span class='ui-icon ui-icon-disk";
+                        html += (project["progress"] === 100) ? "" : " ui-state-disabled";
+                        html += "'></span></button></td><td class='middle label' lid='comaDesc.label'></td></tr>";
+                        var even = !even;
+                        html += "<tr class='" + ((even) ? "even" : "odd") + " overviewfiles'>";
+                        html += "<td class='left'><a name='overviewfiles' class='anchor'></a><a href='#overview' onclick='javascript:$(\".overview\").effect(\"highlight\", {color: \"red\"}, 1750);' class='tooltip' tid='jumpOverview.title'><span class='ui-icon ui-icon-arrowreturnthick-1-n'></span></a>";
+                        html += "<span class='label' lid='comaLst.label'></span></td><td class='left'><button class='ui-button ui-widget ui-corner-all tooltip' tid='buttonView' onclick='javascript:viewComaLst();'><span class='ui-icon ui-icon-newwin";
+                        html += (project["progress"] === 100) ? "" : " ui-state-disabled";
+                        html += "'></span></button><button class='ui-button ui-widget ui-corner-all tooltip' tid='buttonDownload' onclick='javascript:downloadComaLst();'><span class='ui-icon ui-icon-disk";
+                        html += (project["progress"] === 100) ? "" : " ui-state-disabled";
+                        html += "'></span></button></td><td class='middle label' lid='comaLstDesc.label'></td></tr>";
+                        even = !even;
+                        html += "<tr class='" + ((even) ? "even" : "odd") + " overviewfiles'>";
+                        html += "<td class='left'><a name='overviewfiles' class='anchor'></a><a href='#overview' onclick='javascript:$(\".overview\").effect(\"highlight\", {color: \"red\"}, 1750);' class='tooltip' tid='jumpOverview.title'><span class='ui-icon ui-icon-arrowreturnthick-1-n'></span></a>";
+                        html += "<span class='label' lid='partitionsLst.label'></span></td><td class='left'><button class='ui-button ui-widget ui-corner-all tooltip' tid='buttonView' onclick='javascript:viewpartitionsLst();'><span class='ui-icon ui-icon-newwin";
+                        html += (project["progress"] === 100) ? "" : " ui-state-disabled";
+                        html += "'></span></button><button class='ui-button ui-widget ui-corner-all tooltip' tid='buttonDownload' onclick='javascript:downloadpartitionsLst();'><span class='ui-icon ui-icon-disk";
+                        html += (project["progress"] === 100) ? "" : " ui-state-disabled";
+                        html += "'></span></button></td><td class='middle label' lid='partitionLstDesc.label'></td></tr>";
+                        even = !even;
+                        for(var i = 0; i < project["faFiles"].length; i++) {
+                            var name = project["faFiles"][i]["filename"].escape();
+                            html += "<tr class='" + ((even) ? "even" : "odd") + " alig" + i + "files'>";
+                            html += "<td class='left'><a name='alig" + i + "files' class='anchor'></a><a href='#alig" + i +"' onclick='javascript:$(\".alig" + i + "\").effect(\"highlight\", {color: \"red\"}, 1750);' class='tooltip' tid='jumpAligOverview.title'><span class='ui-icon ui-icon-arrowreturnthick-1-n'></span></a>";
+                            html += name;
+                            html += "</td><td class='left'><button class='ui-button ui-widget ui-corner-all tooltip' tid='buttonView' onclick='javascript:viewAlign(" + i + ")'><span class='ui-icon ui-icon-newwin'></span></button><button class='ui-button ui-widget ui-corner-all tooltip' tid='buttonDownload' onclick='javascript:downloadAlign(" + i + ")'><span class='ui-icon ui-icon-disk'></span></button>";
+                            html += "</td><td class='middle label' lid='originalFaFileDesc.label'></td></tr>";
+                            even = !even;
+                            html += "<tr class='" + ((even) ? "even" : "odd") + " alig" + i + "files'>";
+                            html += "<td class='left'><a name='alig" + i + "files' class='anchor'></a><a href='#alig" + i +"' onclick='javascript:$(\".alig" + i + "\").effect(\"highlight\", {color: \"red\"}, 1750);' class='tooltip' tid='jumpAligOverview.title'><span class='ui-icon ui-icon-arrowreturnthick-1-n'></span></a>";
+                            html += name + ".haploweb";
+                            html += "</td><td class='left'><button class='ui-button ui-widget ui-corner-all tooltip" + ((missing(project["faFiles"][i]["mj"])) ? " ui-state-disabled" : "") + "' tid='buttonView' onclick='javascript:viewHaploweb(" + i + ")'><span class='ui-icon ui-icon-newwin'></span></button><button class='ui-button ui-widget ui-corner-all tooltip" + ((missing(project["faFiles"][i]["mj"])) ? " ui-state-disabled" : "") + "' tid='buttonDownload' onclick='javascript:downloadHaploweb(" + i + ")'><span class='ui-icon ui-icon-disk'></span></button>";
+                            html += "</td><td class='middle label' lid='haplowebTxtFileDesc.label'></td></tr>";
+                            even = !even;
+                            html += "<tr class='" + ((even) ? "even" : "odd") + " alig" + i + "files'>";
+                            html += "<td class='left'><a name='alig" + i + "files' class='anchor'></a><a href='#alig" + i +"' onclick='javascript:$(\".alig" + i + "\").effect(\"highlight\", {color: \"red\"}, 1750);' class='tooltip' tid='jumpAligOverview.title'><span class='ui-icon ui-icon-arrowreturnthick-1-n'></span></a>";
+                            html += name + ".tsv";
+                            html += "</td><td class='left'><button class='ui-button ui-widget ui-corner-all tooltip" + ((missing(project["faFiles"][i]["mj"])) ? " ui-state-disabled" : "") + "' tid='buttonView' onclick='javascript:viewFFR(" + i + ")'><span class='ui-icon ui-icon-newwin'></span></button><button class='ui-button ui-widget ui-corner-all tooltip" + ((missing(project["faFiles"][i]["mj"])) ? " ui-state-disabled" : "") + "' tid='buttonDownload' onclick='javascript:downloadFFR(" + i + ")'><span class='ui-icon ui-icon-disk'></span></button>";
+                            html += "</td><td class='middle label' lid='ffrTxtFileDesc.label'></td></tr>";
+                            even = !even;
+                            html += "<tr class='" + ((even) ? "even" : "odd") + " alig" + i + "files'>";
+                            html += "<td class='eft'><a name='alig" + i + "files' class='anchor'></a><a href='#alig" + i +"' onclick='javascript:$(\".alig" + i + "\").effect(\"highlight\", {color: \"red\"}, 1750);' class='tooltip' tid='jumpAligOverview.title'><span class='ui-icon ui-icon-arrowreturnthick-1-n'></span></a>";
+                            html += name + ".svg";
+                            html += "</td><td class='left'><button class='ui-button ui-widget ui-corner-all tooltip" + ((missing(project["faFiles"][i]["svg"])) ? " ui-state-disabled" : "") + "' tid='buttonView' onclick='javascript:viewSVG(" + i + ")'><span class='ui-icon ui-icon-newwin'></span></button><button class='ui-button ui-widget ui-corner-all tooltip" + ((missing(project["faFiles"][i]["svg"])) ? " ui-state-disabled" : "") + "' tid='buttonDownload' onclick='javascript:downloadSVG(" + i + ")'><span class='ui-icon ui-icon-disk'></span><button class='ui-button ui-widget ui-corner-all tooltip" + ((missing(project["faFiles"][i]["svg"]) || missing(project["faFiles"][i]["graphstyle"])) ? " ui-state-disabled" : "") + "' tid='buttonEditSvg' onclick='javascript:editSVG(" + i + ")'><span class='ui-icon ui-icon-pencil'></span></button>";
+                            html += "</td><td class='middle label' lid='svgTxtFileDesc.label'></td></tr>";
+                            even = !even;
+                        }
+                        html += "</table>"; // end file table
+                        // apply html
+                        $("#projectShowBox").html(html);
+                        // do missing needed actions
+                        setLanguage(language);
+//                        $( "#sortable" ).sortable({ handle: ".ui-dialog-title" });
+                        if(project["progress"] !== 100) {
+                            $('#progressbar').progressbar({value:project["progress"]});
+                            $('#progressbar').find('.ui-progressbar-value').addClass('activeProgressbar').removeClass('ui-widget-header');
+                            $('#progressbarLabel').addClass('activeProgressbarLabel');
+                            $('.actionRequiresCompletion').addClass('ui-state-disabled');
+                        }
+                    }
+                } // TODO
+                function downloadEverything() {
+                    $("#calculationOverlay").show();
+                    var zip = new JSZip();
+                    for(var i = 0; i < project["faFiles"].length; i++) {
+                        var name = project["faFiles"][i]["filename"].escapeZip();
+                        zip.file(name, project["faFiles"][i]["data"]);
+                        zip.file(name + ".haploweb", project["faFiles"][i]["mj"]);
+                        zip.file(name + ".tsv", generateFFRListByParams(i, true, true, true, false));
+                        if(!(missing(project["faFiles"][i]["mj"]))) { // will not be available if "onlyComa" option is set ...
+                            zip.file(name + ".svg", project["faFiles"][i]["svg"]);
+                        }
+                        zip.file("CoMa.svg", project["coma"]);
+                        zip.file("CoMa.tsv", project["comaLst"]);
+                    }
+                    zip.generateAsync({type:"blob"}).then(function(content) { saveAs(content, "all.zip"); $("#calculationOverlay").hide(); });
+                } // TODO
+                function downloadComaLst() {
+                    download("text/plain", "CoMa.tsv", project["comaLst"]);
+                }
+                function viewComaLst() {
+                    view("text/plain", project["comaLst"]);
+                }
+                function viewpartitionsLst() {
+                    view("text/plain", project["partitionsLst"]);
+                }
+                function downloadpartitionsLst() {
+                    download("text/plain", "partitions.tsv", project["partitionsLst"]);
+                }
+                function downloadComa() {
+                    download('image/svg+xml', "coma.svg", project["coma"]);
+                }
+                function viewComa() {
+                    view("image/svg+xml", project["coma"]);
+                }
+                function viewAlign(i) {
+                    view("text/plain", project["faFiles"][i]["data"]);
+                }
+                function downloadAlign(i) {
+                    download("application/fasta", project["faFiles"][i]["filename"], project["faFiles"][i]["data"]);
+                }
+                function viewHaploweb(i) {
+                    view("text/plain", project["faFiles"][i]["mj"]);
+                }
+                function downloadHaploweb(i) {
+                    download("text/haploweb", project["faFiles"][i]["filename"] + ".haploweb", project["faFiles"][i]["mj"]);
+                }
+                function generateFFRListByParams(i, onlyInd, sort, sortAlpha, outputSet) {
+                    Printer = function () {
+                        this.indent = "  ";
+                        this.newline = "\n";
+                        this.countingOffset = 1;
+                        this.l = [];
+                        this.printString = function (s) {
+                            this.l.push(s);
+                        };
+                        this.close = function () {};
+                        this.toText = function () {
+                            return this.l.join("");
+                        }
+                    }
+                    var p = new Printer();
+                    LstExtractor.extract(p, project["faFiles"][i]["mj"], onlyInd, sort, sortAlpha, outputSet, project["delimiter"]);
+                    return p.toText();
+                }
+                function generateFFRList(i, f) {
+                    var onlyInd=true, sort=true, sortAlpha=true, outputSet=false;
+                    f(generateFFRListByParams(i, onlyInd, sort, sortAlpha, outputSet));
+                } // TODO
+                function viewFFR(i) {
+                    generateFFRList(i, function(txt) {
+                        view("text/plain", txt);
+                    });
+                }
+                function downloadFFR(i) {
+                    generateFFRList(i, function(txt) {
+                        download("text/ffrs", project["faFiles"][i]["filename"] + ".tsv", txt);
+                    });
+                }
+                function viewSVG(i) {
+                    view("image/svg+xml", project["faFiles"][i]["svg"]);
+                }
+                function downloadSVG(i) {
+                    download("text/plain", project["faFiles"][i]["filename"] + ".svg", project["faFiles"][i]["svg"]);
+                }
+                function getAvailableNames() {
+                    var names = [];
+                    var nodes = currentGraphEdit.nodes;
+                    var current = nodes.h;
+                    while(current != null) {
+                        if (current.item != null && current.item.node != null && current.item.node.names != null) {
+                            var current2 = current.item.node.names.h
+                            while(current2 != null) {
+                                names.push(current2.item);
+                                current2 = current2.next;
+                            }
+                        }
+                        current = current.next;
+                    }
+                    names.sort();
+                    return names;
+                }
+                function editSVG(i) {
+                    currentGraphEdit = new draw_Graph(parsing_MJNetParser.parseNet(project["faFiles"][i]["mj"]));
+                    currentGraphEditstretch = 1;
+                    currentGraphEdit.loadStyle(project["faFiles"][i]["graphstyle"]);
+                    editSVGId = i;
+                    var availableNames = getAvailableNames();
+                    $( "#namesearch" ).autocomplete({
+                        source: availableNames,
+                        select : function (event, ui) {
+                            searchSequenceByName(ui.item.value);
+                            event.preventDefault();
+                            return false;
+                        }
+                    });
+                    $( "#namesearch" ).keydown(function(event){
+                        if (event.keyCode == 13) {
+                            var val = $("#namesearch").val();
+                            searchSequenceByName(val);
+                            event.preventDefault();
+                            return false;
+                        }
+                    });
+                    $( "#editSVGDialog" ).dialog("open");
+                }
+            </script>
+        </div>
+        <a name="bottom" class="anchor"></a>
+        <script>
+            // complete DOM loaded? Then set the DOM's text
+            setLanguage(language);
+            // tooltip & other jquery-ui objects
+            $( document ).tooltip();
+            $( '#mainToolsToolbox' ).menu();
+            $( '#editSVGDialog' ).dialog({
+                modal: true,
+                autoOpen: false,
+                width:  window.innerWidth  - 10,
+                open: function() {
+                    $(".dialogSaveButton").text(languageDicts[language]["dict"]["buttonSave"]);
+                    $(".dialogCancelButton").text(languageDicts[language]["dict"]["buttonCancel"]);
+                    var dialog = $("#editSVGDialog");
+                    dialog.dialog('option', 'title', languageDicts[language]["dict"]["editSvg.title"].format([project["faFiles"][editSVGId]["filename"].escape()]));
+                    updateSVG();
+                    selectedObj = null;
+                    dialog.dialog("open");
+                    $("#editSVGDialog").dialog("option", "width",  window.innerWidth  - 10);
+                    var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0); //Math.min(Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 10, $("#editSVGDialogDim").height() + 10);
+                    $("#editSVGDialog").dialog("option", "height", h);
+                    updateSVG();
+                },
+                buttons: [{
+                        "text" : languageDicts[language]["dict"]["buttonSave"],
+                        "class" : "dialogSaveButton",
+                        "click" : function() {
+                            $( document ).ready(function() {
+                                removePreviousCircleDialogs();
+                                setTimeout(function() {
+                                    project["faFiles"][editSVGId]["graphstyle"] = currentGraphEdit.saveStyle();
+                                    project["faFiles"][editSVGId]["svg"] = currentGraphEdit.getSvgCode();
+                                    $( '#editSVGDialog' ).dialog( "close" );
+                                }, 100);
+                            });
+                        }
+                    }, {
+                        "text" : languageDicts[language]["dict"]["buttonCancel"],
+                        "class" : "dialogCancelButton",
+                        "click" : function() {
+                            $( document ).ready(function() {
+                                removePreviousCircleDialogs();
+                                setTimeout(function() {
+                                    $( '#editSVGDialog' ).dialog( "close" );
+                                }, 100);
+                            });
+                        }
+                    }
+                ],
+                create: function( event, ui ) {
+                    $('.ui-dialog-buttonset').prependTo('.ui-dialog-titlebar');
+                },
+                hide: {
+                    effect: "explode",
+                    duration: 1000
+                }                
+            });
+            $( "#shortcutConfigurationWarningDialog" ).dialog({
+                modal: true,
+                autoOpen: false,
+                buttons: [{
+                    "text" : languageDicts[language]["dict"]["buttonOk"],
+                    "class" : "dialogOkButton",
+                    "click" : function() {
+                        $( this ).dialog( "close" );
+                    }
+                }],
+                open: function() {
+                    $(".dialogOkButton").text(languageDicts[language]["dict"]["buttonOk"]);
+                },
+                hide: {
+                    effect: "explode",
+                    duration: 1000
+                }
+            });
+            $( "#genericInfoDialog" ).dialog({
+                modal: true,
+                autoOpen: false,
+                height: 400,
+                width: 750,
+                buttons: [{
+                    "text" : languageDicts[language]["dict"]["buttonOk"],
+                    "class" : "dialogOkButton",
+                    "click" : function() {
+                        $( this ).dialog( "close" );
+                    }
+                }],
+                open: function() {
+                    $(".dialogOkButton").text(languageDicts[language]["dict"]["buttonOk"]);
+                },
+                hide: {
+                    effect: "explode",
+                    duration: 1000
+                }
+            });
+            $( "#shortcutConfigurationDialog" ).dialog({
+                autoOpen: false,
+                height: 400,
+                width: 750,
+                modal: true,
+                open: function() {
+                    // set text
+                    $(this).dialog('option', 'title', languageDicts[language]["dict"]["configureShortcuts.label"]);
+                    $(".dialogSaveButton").text(languageDicts[language]["dict"]["buttonSave"]);
+                    $(".dialogCancelButton").text(languageDicts[language]["dict"]["buttonCancel"]);
+                    $("#availableActionsAutoComplete").attr("placeholder", languageDicts[language]["dict"]["searchbarplaceholdertext"]);
+                    // set content
+                    var html = "<table class='dataContentTable'><tr class='header'><td class='label left' lid='shortcutAction.label'></td><td class='label right' lid='shortcutValue.label'></td></tr>";
+                    var counter = 0;
+                    var availableActions = new Array();
+                    for(var actionNr=0; actionNr < shortcuts["actions"].length; actionNr++) {
+                        var action = shortcuts["actions"][actionNr];
+                        availableActions.push(action);
+                        html += "<tr id='shortcut" + action + "tr' class='" + ((counter % 2 == 0) ? "even" : "odd") +"'><td><a name='shortcut" + action + "anchor'></a><span class='label' lid='" + action + ".label'></span></td><td align='right'><input id='shortcut" + action + "edit' type='text' value='-' style='text-align: right;'></td></tr>";
+                        counter++;
+                    }
+                    html += "</table>";
+                    $("#shortcutConfigurationDialogContent").html(html);
+                    for(key in shortcuts) {
+                        if(key.startsWith("_")) {
+                            var value = shortcuts[key];
+                            key = key.substr(1);
+                            var ele = document.getElementById("shortcut" + value + "edit");
+                            if(ele != null) {
+                                ele.value = key;
+                                $(ele).attr("placeholder", key);
+                                counter++;
+                            }
+                        }
+                    }
+                    // damn autocomplete
+                    var control = $( "#availableActionsAutoComplete" );
+                    control.autocomplete({
+                        source: availableActions,
+                        select: function(event, ui) {
+                            jump("shortcut" + ui.item.value + "anchor");
+                            javascript:$("#shortcut" + ui.item.value + "tr").effect('highlight', {color: 'red'}, 1750);
+                        }
+                    });
+                    control.focus(function(){$(this).val('');});
+                    setLanguage(language);
+                },
+                buttons: [{
+                        "text" : languageDicts[language]["dict"]["buttonSave"],
+                        "class" : "dialogSaveButton",
+                        "click" : function() {
+                            var newShortcuts = getNewShortcuts();
+                            if(newShortcuts != null) {
+                                shortcuts = newShortcuts;
+                                $( "#shortcutConfigurationDialog" ).dialog("close");
+                            }
+                        }
+                    }, {
+                        "text" : languageDicts[language]["dict"]["buttonCancel"],
+                        "class" : "dialogCancelButton",
+                        "click" : function() {
+                            $( "#shortcutConfigurationDialog" ).dialog("close");
+                        }
+                    }
+                ],
+                hide: {
+                    effect: "explode",
+                    duration: 1000
+                }
+            });
+            // do shortcut handling
+            $("body").keydown(function(event) {
+                var fobj = $(':focus');
+                if(!fobj.is("input") && !fobj.is("textarea")) {
+                    var mod = "_";
+                    if(event.ctrlKey)  mod = mod + "c";
+                    if(event.altKey)   mod = mod + "a";
+                    if(event.shiftKey) mod = mod + "s";
+                    mod = mod + event.keyCode;
+                    console.log("INFO: pressed '" + mod + "'!");
+                    if(typeof shortcuts[mod] != "undefined") {
+                        console.log("INFO: exec '" + shortcuts[mod] + "'!");
+                        handleEvent(shortcuts[mod]);
+                        event.preventDefault();
+                    }
+                }
+            });
+            // everything done -> remove overlay
+            $("#calculationOverlay").hide();
+            $("#modalOverlay").hide();
+            $('#mainToolsToolbox').toggle(); // start with toolbox opened
+        </script>
+    </body>
+</html>

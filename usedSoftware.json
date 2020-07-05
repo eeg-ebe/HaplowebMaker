@@ -1,0 +1,32 @@
+[
+    {
+        "name" : "jQuery",
+        "urls" : [ "https://jquery.com/", "https://github.com/jquery/jquery" ],
+        "license" : "https://github.com/jquery/jquery/blob/master/LICENSE.txt"
+    },
+    {
+        "name" : "jqueryui",
+        "urls" : [ "http://jqueryui.com/", "https://github.com/jquery/jqueryui.com" ],
+        "license" : "https://github.com/jquery/jqueryui.com/blob/master/LICENSE.txt"
+    },
+    {
+        "name" : "JSZip",
+        "urls" : [ "https://stuk.github.io/jszip/", "https://github.com/Stuk/jszip" ],
+        "license" : "https://github.com/Stuk/jszip/blob/master/LICENSE.markdown"
+    },
+    {
+        "name" : "HaXe",
+        "urls" : [ "http://haxe.org/", "https://github.com/HaxeFoundation/haxe" ],
+        "license" : "https://haxe.org/foundation/open-source.html"
+    },
+    {
+        "name" : "momentjs",
+        "urls" : [ "http://momentjs.com/", "https://github.com/moment/moment/" ],
+        "license" : "https://github.com/moment/moment/blob/develop/LICENSE"
+    },
+    {
+        "name" : "FileSaver.js",
+        "urls" : [ "https://github.com/eligrey/FileSaver.js/" ],
+        "license" : "https://github.com/eligrey/FileSaver.js/blob/master/LICENSE.md"
+    }
+]

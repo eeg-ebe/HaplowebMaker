@@ -1,0 +1,14 @@
+{
+    "actions" : [ "newInstance", "loadProject", "saveProject", "scrollUp", "scrollDown", "openMainToolsToolbox", "contact", "cite", "usedSoftware", "configureShortcuts", "jobsubmission" ],
+    "_s67" : "contact",
+    "_s68" : "scrollDown",
+    "_s74" : "jobsubmission",
+    "_s78" : "newInstance",
+    "_s79" : "loadProject",
+    "_s81" : "configureShortcuts",
+    "_s83" : "saveProject",
+    "_s84" : "openMainToolsToolbox",
+    "_s85" : "scrollUp",
+    "_s87" : "usedSoftware",
+    "_s90" : "cite"
+}
