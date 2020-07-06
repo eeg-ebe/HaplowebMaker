@@ -46,6 +46,7 @@ class NodePos {
 
     private var valid:Bool;
     private var svg:String;
+    private var graph:Graph;
     public inline function set_xPos(n:Float):Void {
         valid = false;
         xPos = n;
@@ -134,7 +135,8 @@ if(colorName == null) {
         dashedArray = n;
     }
 
-    public inline function new(n:Node) {
+    public inline function new(n:Node, graph:Graph) {
+        this.graph = graph;
         valid = false;
         pie = new List<Pair<String,Int>>();
         this.node = n;
@@ -279,15 +281,53 @@ if(colorName == null) {
         return yPos + radius;
     }
 
+    public function containsInd(ind:String, pos:NodePos):Bool {
+        for (name in pos.node.names) {
+            var nameS:String = Seq.getIndIdentifier(name);
+            if (nameS == ind) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function getColor(ind:String):String {
+        for (c in graph.nodes) {
+            if (c == this) {
+                continue;
+            }
+            if (containsInd(ind, c)) {
+                return "blue";
+            }
+        }
+        return "black";
+    }
+
     // Issue #1: Haplotype identification in the network
     public function getDivContent():String {
         var result:String = "<table style='width:100%'>";
         result += "<tr><td>Id</td><td>" + this.node.id + "</td></tr>";
         result += "<tr><td>SpId</td><td>" + this.node.spId + "</td></tr>";
 //        result += "<tr><td>Seq</td><td>" + this.node.seq + "</td></tr>";
-        result += "<tr><td>Names</td><td>" + this.node.names.join("; ") + "</td></tr>";
-//        result += "<tr><td>xPos</td><td>" + this.xPos + "</td></tr>";
-//        result += "<tr><td>yPos</td><td>" + this.yPos + "</td></tr>";
+        result += "<tr><td>Names</td><td>";
+        var blueColored:Int = 0;
+        var sepOut:Bool = false;
+        for(name in this.node.names) {
+            if (sepOut) {
+                result += "; ";
+            }
+            var nameS:String = Seq.getIndIdentifier(name);
+            var color:String = getColor(nameS);
+            if (color == "blue") {
+                ++blueColored;
+            }
+            result += "<span style='color:" + color + "'>" + name + "</span>";
+            sepOut = true;
+        }
+        result += "</td></tr>";
+        result += "<tr><td colspan='2'>" + blueColored + " blue colored sequence name(s)</td></tr>";
+        result += "<tr><td>xPos</td><td>" + this.xPos + "</td></tr>";
+        result += "<tr><td>yPos</td><td>" + this.yPos + "</td></tr>";
 //        result += "<tr><td>radius</td><td>" + this.radius + "</td></tr>";
         result += "</table>";
         return result;

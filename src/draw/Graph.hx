@@ -41,7 +41,7 @@ class Graph {
         links = new List<Link>();
         // fill out nodes
         for(e in l) {
-            nodes.add(new NodePos(e));
+            nodes.add(new NodePos(e, this));
         }
         // fill out connections/links
         var nextConId:Int = 0;
