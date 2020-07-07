@@ -312,6 +312,10 @@ if(colorName == null) {
         result += "<tr><td>Names</td><td>";
         var blueColored:Int = 0;
         var sepOut:Bool = false;
+        var difNames:StringMap<Bool> = new StringMap<Bool>(); // StringMap missued as a set ...
+        var difInd:Int = 0; // used for keeping track of how many items there are in difNames (haxe does not have a length function)
+        var difNames2:StringMap<Bool> = new StringMap<Bool>(); // StringMap missued as a set ...
+        var difInd2:Int = 0; // used for keeping track of how many items there are in difNames (haxe does not have a length function)
         for(name in this.node.names) {
             if (sepOut) {
                 result += "; ";
@@ -320,14 +324,22 @@ if(colorName == null) {
             var color:String = getColor(nameS);
             if (color == "blue") {
                 ++blueColored;
+                if (!difNames2.exists(nameS)) {
+                    difInd2++;
+                    difNames2.set(nameS, true);
+                }
+            }
+            if (!difNames.exists(nameS)) {
+                difInd++;
+                difNames.set(nameS, true);
             }
             result += "<span style='color:" + color + "'>" + name + "</span>";
             sepOut = true;
         }
         result += "</td></tr>";
-        result += "<tr><td colspan='2'>" + blueColored + " blue colored sequence name(s)</td></tr>";
-        result += "<tr><td>xPos</td><td>" + this.xPos + "</td></tr>";
-        result += "<tr><td>yPos</td><td>" + this.yPos + "</td></tr>";
+        result += "<tr><td colspan='2'>Sequences of heterozygous individuals are shown in blue (" + blueColored + " blue colored sequence name(s), " + difInd + " individual(s) thereof " + difInd2 + " heterozygous individuals)</td></tr>";
+//        result += "<tr><td>xPos</td><td>" + this.xPos + "</td></tr>";
+//        result += "<tr><td>yPos</td><td>" + this.yPos + "</td></tr>";
 //        result += "<tr><td>radius</td><td>" + this.radius + "</td></tr>";
         result += "</table>";
         return result;

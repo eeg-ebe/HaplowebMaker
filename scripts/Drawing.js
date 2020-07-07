@@ -5263,6 +5263,10 @@ draw_NodePos.prototype = {
 		result += "<tr><td>Names</td><td>";
 		var blueColored = 0;
 		var sepOut = false;
+		var difNames = new haxe_ds_StringMap();
+		var difInd = 0;
+		var difNames2 = new haxe_ds_StringMap();
+		var difInd2 = 0;
 		var _g_head = this.node.names.h;
 		while(_g_head != null) {
 			var val = _g_head.item;
@@ -5282,14 +5286,28 @@ draw_NodePos.prototype = {
 			var color = this.getColor(nameS);
 			if(color == "blue") {
 				++blueColored;
+				if(!(__map_reserved[nameS] != null ? difNames2.existsReserved(nameS) : difNames2.h.hasOwnProperty(nameS))) {
+					++difInd2;
+					if(__map_reserved[nameS] != null) {
+						difNames2.setReserved(nameS,true);
+					} else {
+						difNames2.h[nameS] = true;
+					}
+				}
+			}
+			if(!(__map_reserved[nameS] != null ? difNames.existsReserved(nameS) : difNames.h.hasOwnProperty(nameS))) {
+				++difInd;
+				if(__map_reserved[nameS] != null) {
+					difNames.setReserved(nameS,true);
+				} else {
+					difNames.h[nameS] = true;
+				}
 			}
 			result += "<span style='color:" + color + "'>" + name + "</span>";
 			sepOut = true;
 		}
 		result += "</td></tr>";
-		result += "<tr><td colspan='2'>" + blueColored + " blue colored sequence name(s)</td></tr>";
-		result += "<tr><td>xPos</td><td>" + this.xPos + "</td></tr>";
-		result += "<tr><td>yPos</td><td>" + this.yPos + "</td></tr>";
+		result += "<tr><td colspan='2'>Sequences of heterozygous individuals are shown in blue (" + blueColored + " blue colored sequence name(s), " + difInd + " individual(s) thereof " + difInd2 + " heterozygous individuals)</td></tr>";
 		result += "</table>";
 		return result;
 	}
