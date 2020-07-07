@@ -1130,6 +1130,8 @@ document.getElementById("loopButton").disabled = true;
                             html += (missing(project["faFiles"][i]["ffrs"])) ? "<span class='label' lid='unknown'></span>" : project["faFiles"][i]["ffrs"];
                             html += "</td></tr><tr class='tooltip' tid='nbinds.title'><td><b class='label' lid='nbinds.label'></b></td><td></td><td class='right'>";
                             html += (missing(project["faFiles"][i]["inds"])) ? "<span class='label' lid='unknown'></span>" : project["faFiles"][i]["inds"];
+                            html += "</td></tr><tr title='The number of heterozygous individuals in this file'><td><b>No. of heterozygous individuals</b></td><td></td><td class='right'>";
+                            html += (missing(project["faFiles"][i]["hinds"])) ? "<span class='label' lid='unknown'></span>" : project["faFiles"][i]["hinds"];
 //Size, Hash, nr. lines, nr. sequences, nr. indiv., sequence characters usage, k-mer, nr. differenciating positions, histogram of nr. seqs per ffr ..., time (start, end, used), nr. ffrs, nr. med vect, (graph attrs. like degree distribution, ...), description, sound
                             html += "</td></tr></table></div></div>";
                         }

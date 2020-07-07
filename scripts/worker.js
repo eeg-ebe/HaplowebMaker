@@ -135,6 +135,7 @@ function calculateFaFile(project, i) {
         setFileVal(i, "intPos", m.getNrInterestingPositions());
         setFileVal(i, "ffrs", m.getNrFFRs());
         setFileVal(i, "inds", m.countIndiv());
+        setFileVal(i, "hinds", m.countHeterozygousIndiv());
         setProgress(++stepsDone, stepsToDO);
         setFileVal(i, "endMJ", Date.now());
         // end of mj - now draw

@@ -1,5 +1,6 @@
 package mj;
 
+import haxe.ds.StringMap;
 import haxe.ds.Vector;
 import haxe.ds.ListSort;
 import util.StdOutPrinter;
@@ -583,7 +584,28 @@ class MJAlgo {
         }
         return l.length;
     }
-
+    public inline function countHeterozygousIndiv():Int {
+        var seenNames:StringMap<Int> = new StringMap<Int>();
+        var current:Seq = seqs.first;
+        while (current != null) {
+            for (s in current.indNames) {
+                var count:Null<Int> = seenNames.get(s);
+                if (count == null) {
+                    count = 0;
+                }
+                count++;
+                seenNames.set(s, count);
+            }
+            current = current.next;
+        }
+        var count:Int = 0;
+        for (key in seenNames.keys()) {
+            if (seenNames.get(key) >= 2) {
+                ++count;
+            }
+        }
+        return count;
+    }
     public static function main():Void {
 /*
         var m:MJAlgo = new MJAlgo();
