@@ -1,0 +1,132 @@
+<!-- my-page.html --> 
+<script src="https://rawcdn.githack.com/oscarmorrison/md-page/master/md-page.js"></script><noscript>
+  
+## Frequently Asked Questions
+
+### Q1: What is HaplowebMaker?
+HaplowebMaker is a program that automatizes the creation of haplotype networks (haplonets) and haplotype webs (haplowebs) from FASTA alignments. Haplowebs are a logical extension of the concept of haplonets in the case of nuclear markers: haplowebs are haplonets with connections added between haplotypes found co-occuring in heterozygous individuals (see [Flot et al. 2010](https://doi.org/10.1186/1471-2148-10-372)), allowing notably to detect FFRs (fields of recombination, i.e. groups of individuals sharing a common pool of alleles following the terminology of [Doyle 1995](https://doi.org/10.2307/2419811)).
+
+### Q2: What is the typical HaplowebMaker workflow?
+Users start by inputting one or several FASTA alignment(s) in which the various alleles of each individual are called "[name_of_individual][delimiter][name_of_allele]": for instance, "Ind1_a", "Ind1_b" for the two haplotypes of individaul Ind1, then "Ind2_a", "Ind2_b" for the two haplotypes of individual Ind2 etc. Although HaplowebMaker can deal with IUPAC ambiguity codes as well as with missing data (represented with the "?" character), it is recommended to use perfectly phased, well-aligned sequences without missing data. After choosing the correct delimiter (by default "_"), users click the "Submit job" button to upload their data file(s). For each input FASTA, HaplowebMaker first computes a median-joining network (following the algorithm of [Bandelt et al. 1999](https://doi.org/10.1093/oxfordjournals.molbev.a026036) also implemented in the program [Network](https://www.fluxus-engineering.com/sharenet.htm) and turns it into a haploweb by adding curves connecting the various haplotypes of each individual. To generate publication-quality figures, users may edit each haploweb using the SVG editor included in HaplowebMaker. Each haploweb can be exported as SVG or PNG files using buttons available within the SVG editor; for obtaining a vectorial PDF output, users may convert the SVG using e.g. Inkscape or alternatively open the SVG within their web browser and use the "print as PDF" function of their browser. Users can save their HaplowebMaker project as a JSON file (containing all the initial data files as well as the results of the analyses) using the "Save project" button in the top left menu. This JSON file can then be submitted by the authors as supporting information when publishing results in a scientific article.
+
+### Q3: Can HaplowebMaker only deal with diploid markers?
+No, HaplowebMaker is very flexible and can also be used to generate "regular" haplonets if users input haploid data (i.e., with a single sequence per individual). In that case, one should make sure that the character selected as a delimiter is not present in the name of any individual. HaplowebMaker can also deal with individuals having three or more haplotype: for instance, if individual "Ind3" possesses three different haplotypes (because it is triploid or simply because of a copy-number variation in the locus under study), then its three haplotypes can be entered as e.g. "Ind3_a", "Ind3_b" and "Ind3_c" (for examples of such cases, see [Flot et al. 2008](https://doi.org/10.1016/j.crvi.2007.12.003)). If an individual is declared in the file as possessing *n* different haplotypes, HaplowebMaker will draw for this individual *n*⋅(*n*-1)/2 curves connecting each of its pairs of haplotypes.
+
+### Q4: What output files does HaplowebMarker generate for each input FASTA file?
+For each FASTA file inputted by users, the JSON output of HaplowebMaker includes four files: the original FASTA dataset; a .haploweb file that is a textual representation of the haploweb in a custom format; a .tsv file that is a tab-delimited, two column file (the first column lists all the individuals in the dataset and the second column has 1 for all the individuals assigned to the first FFR for this marker, "2" for all individuals assigned to the second FFR for this marker, etc.); and a .svg file that contains the graphical representation of the haploweb. All four files can be viewed in the web browser (left "Actions" button) as well as downloaded (middle "Actions" button), but the .svg file can also be explored and edited using a custom-built SVG editor (right "Actions" button).
+
+### Q5: What is the "partition matrix" outputted by HaplowebMaker, and how to use it?
+In addition to generating a haploweb for each input FASTA, HaplowebMaker returns also a "partition matrix" (file partitions.tsv). This tab-delimited file recapitulates in a single table the FFRs detected by all the markers included in the analysis. The first column lists all the individuals in the dataset and is followed by one column per marker, in which all individuals marked "1" belong to the first FFR for this marker, all individuals marked with "2" belong to the second FFR for this marker, etc. This partition matrix can be downloaded and analyzed further using other tools such as CoMa and Limes - for Limes, the tab-delimited matrix should be converted to comma-delimited first).
+
+### Q6: Why does HaplowebMaker also outputs a conspecificity matrix?
+The conspecificity matrix ([Debortoli et al. 2016](https://doi.org/10.1016/j.cub.2016.01.031)) displays the conspecificity score of each pair of individual in the dataset. The partition matrix produced by HaplowebMaker is turned into a conspecifity matrix using the separate program CoMa). At present CoMa does not include many options, hence for the convenience of users the output of CoMa is directly included among the outputs of HaplowebMaker. This will probably change in the future as we plan to further develop CoMa. By default, CoMa computes the conspecificity score of a pair of individuals as the number of columns in the partition matrix that consider the two individuals as conspecific vs. the number of columns that consider the two individuals as belonging to different putative species. If HaplowebMaker users wish to use a different calculation mode, they should first save the partition file to their hard disk then upload it to CoMa.
+
+### Q7: What are the various advanced settings available?
+In addition to the basic setting regarding the choice of the delimiter, other options are available under the "Advanced Settings" menu. Indels (represented with "-" in the input FASTA file) can be treated either as a fifth character state or as missing data (in which case it is equivalent to "?"). Ambiguous positions (namely, K, W, R, Y, S, M, B, D, H, V, N and ?, with the addition of "-" if the above-mentioned "treat indel as missing data" option was selected) can either trigger an error message (the default option) or the columns containing these ambiguous positions can be masked (we plan to implement further options for dealing with missing data in the future).
+
+Two different network algorithms are available to date: minimum spanning networks and median joining, both of which can be relaxed by an epsilon factor (thereby adding more connections; [Bandelt et al. 1999](https://doi.org/10.1093/oxfordjournals.molbev.a026036) - the default network is median joining with an epsilon factor equal to zero. The area (default choice) or radius (if one wants differences in haplotype frequencies to be more conspicuous) of the circles representing the haplotypes, as well as the thickness of the curves connecting haplotypes found co-occurring in heterozygous individuals, can be set to be proportional to the number of individuals possessing this haplotype (default), to be proportional to the inferred haplotype frequencies (setting that assumes that individuals with a single haplotype possess two identical copies of it and therefore counts them twice), to be proportional to the exact number of occurrences of this haplotype in the input file (allowing to specify the genotypes of polyploid individuals), or to be constant.
+
+A "color file" may be inputted attributing colors to individuals (default) or to alleles of individuals. A check box (checked by default) allows users to choose whether to color the parts of the network according to each detected FFR. Another check box allow users to speed calculation by skipping the haploweb construction stage and going directly to partition calculation (which is particularly useful when processing a large number of FASTA files). And finally, a last check box allows users to filter out singletons (i.e., haplotypes found a single time in the dataset), an option useful when dealing with cloned sequences (which often comprise many PCR-induced mutations) or with invasive specie (since range expansion result in numerous singleton mutation; [Excoffier et al. 2013](https://www.annualreviews.org/doi/abs/10.1146/annurev.ecolsys.39.110707.173414)).
+
+### Q8: What are the different actions available in the SVG editor included in HaplowebMaker?
+Each haploweb SVG is composed of several sets of elements that can be acted upon independently. Nodes can be toggled on or off ("Toggle nodes" button), users can increase their size relative to the rest of the figure or decrease it ("Nodes++" and "Nodes--" buttons), and their respective colors can be modified by uploading a "color file" ("Color nodes according to color file" button). A special type of node is the median vectors (in the case of the median-joining algorithm), which can also be toggled one or off ("Toggle median vectors" button).
+
+The edges of the graph (representing the mutational paths between haplotypes) can be toggled on or off ("Toggle edges" button), users can increase or decrease their thickness ("Edges++" and "Edges--" buttons), and the mutations themselves can be displayed as lines and/or text on the edges (checkboxes "Mutations shown as lines" and "Mutations shown as text" + clicking the corresponding "Change" Button).
+
+The Bézier curves connecting the haplotypes found co-occurring in heterozygous individuals can be toggled on or off ("Toggle curves" button), users can increase or decrease their thickness ("Curves++" and "Curves--" buttons), and their colors can be set to reflect the color file ("Color curves according to color file" button). A special type of curve (only available when the option "curve thickness proportional to inferred frequencies" was selected in the Advanced settings before launching the analysis) are self-loops ("Toggle self-loops" button), which represent the connection between a haplotype and itself because of homozygous individuals.
+
+The positions of the nodes can be adjusted by clicking on them to nudge them individually, or users can click the "Restart" button, which sprays haplotypes in random initial positions then re-launches the force-directed algorithm. These two actions are also available as separate buttons: "Random" to assign a random position to each node, and "Force" to spread the nodes using a force-directed algorithm (if the force-directed algorithm takes a lot of time, it can be stopped using the "Stop force" button).
+
+Users can control the zoom factor using the "Zoom in", "Zoom out" and "Zoom?" buttons (the latter opens a box where users can enter their desired zoom factor), or go back to the initial view using "Reset zoom". The position of the curves on the network can be adjusted manually by nudging their middle points ("Toggle Bézier points") or recalculated automatically using the "Recalc all curves" and "Recalc other curves" button (the latter only repositions the curves that have not been adjusted manually by the user).
+
+The network can be rotated left or right, either by 90° degrees (arrow buttons) or by a specific angle ("Rot angle" button). Users can also mirror the network horizontally ("Mirror X") or vertically ("Mirror Y"). The "Toggle center" button shows the position of the center of gravity of the network, the "Toggle angle" button displays the angle between two adjacent edges attached to the same node, and the "Toggle node name" buttons displays, next to each node, the name of the first sequence in the input FASTA corresponding to this node.
+
+Finally, two export buttons are available: "Export png" (which may not work well in case of large networks) and "Export svg".
+
+### Q9: What information does HaplowebMaker display regarding each dataset?
+For each FASTA inputted in HaplowebMaker, the program returns a series of statistics: the number of sequences, the number of different sequences (i.e., haplotypes), the number of median vectors reconstructed by the median joining algorithm (if applicable), the total length of the alignment, the number of variable positions in the alignment, the number of FFRs (fields for recombination, i.e. numbers of individuals connected by shared haplotypes sensu Doyle 1995), the total number of individuals and the number of heterozygotes (defined as any individual harboring at least two different haplotypes). It is also possible to get more precise information by right-clicking on a node within the SVG editor: in such case, an info box opens telling the node Id, the Id of the FFR to which this node belongs, and the names of the sequences under which the haplotype represented by this node was detected in the input FASTA file (sequences belonging to heterozygous individuals are shown in blue).
+
+### Q10: How should I structure my input FASTA files?
+The FASTA alignment file needs to list every sequence in your dataset. Furthermore the description/header/names of each sequence needs to follow certain rules, so that HaplowebMaker knows which sequences co-occur in which individual. More precisely, the header of each sequence should follow the pattern XXX_Y, where XXX represents the name of each individual and Y a number, letter or any other symbol of your choice.
+
+Example:
+````
+>Anton_a
+ACTGTCA---ACTGATGC
+>Anton_b
+TAACGT----ACTGATGC
+>Berta_1
+ACTA----CTGAACTATG
+>Berta_2
+ACTA---ACTGAACTATG
+````
+
+(Here, HaplowebMaker knows that the two sequences ACTGTCA---ACTGATGC and TAACGT----ACTGATGC co-occur in the same individual named "Anton" as both sequences share the same substring before the _ delimiter.)
+
+
+### Q11: How should I specify homozygous individuals?
+As longs as  the name itself does not contain any delimiter characters (by default, "_"), homozygous individual can be specified in three different ways: 
+
+````
+>Charlie
+ACTG
+````
+or
+````
+>Charlie_a
+ACTG
+````
+or
+````
+>Charlie_a
+ACTG
+>Charlie_b
+ACTG
+````
+
+The last representation can be used in order to highlight that although the individual is homozyogus, it is till a diploid individual.
+
+If however the name of the individual contains a delimiter character then one should make sure to specify an allele name:
+````
+>Charlie_Brown_a
+ACTG
+````
+or
+````
+>Charlie_Brown_a
+ACTG
+>Charlie_Brown_b
+ACTG
+````
+
+### Q12: Are they special rules I should be aware of regarding FASTA input files?
+It is possible to input several FASTA files at once (provided they are all in the same folder). However, inputting very large amounts of FASTA files may cause your browser to run out of memory.
+
+If there are several delimiters in a sequence header, HaplowebMaker will use the last delimiter character to split the sequence header. E.g. if you have Charlie_Brown_sequenceA, then HaplowebMaker will consider that Charlie_Brown is the name of the individual this sequence belongs to and that sequenceA is the name of this allele of this individual.
+
+Spaces in sequence headers are dealt with differently depending on their position in the header: if they are at the very beginning or end of a header, spaces are ignored, but not if they occur in the middle of a header.
+
+It is possible to add comments in FASTA alignment files. HaplowebMaker ignores any line that starts with a semicolon or a hashtag character.
+
+### Q12: Are they special rules I should be aware of regarding color files?
+
+Color files are tab-separated file mapping a color to an individual (or to a specific sequence). Each line in a color file should contain two columns: the first one with the names of the individuals (or the sequences) and the second one specifying the color.
+
+HaplowebMaker supports colors the [140 HTML color names](https://www.w3schools.com/colors/colors_names.asp). Furthermore it is possible to specify a color via their [rgb()](https://www.w3schools.com/colors/colors_rgb.asp), rgba(), [hsl()](https://www.w3schools.com/colors/colors_hsl.asp), hsla(), #XXX and #XXXXXX representations. When using HTML color names, please avoid spaces, e.g. "Alice Blue" should be written "AliceBlue" (most web browsers do not support spaces in color names and will return black for a color name that they do not know). To find the numerical code for a color you like, use a [color chooser](https://www.w3schools.com/colors/colors_picker.asp). You should also avoid colors with alpha channels. 
+
+### Q13: Which line endings should I use for my input files?
+Unix (\n) and Windows (\r\n) line endings both work fine. However HaplowebMaker cannot handle the deprecated Macintosh line endings (\r) or the AIX OS line endings (\025).
+
+### Q14: Which character encoding should I use for my input files?
+The de facto internet standard encoding: UTF-8.
+
+### Q15: How can I get HaplowebMaker to run faster?
+HaplowebMaker runs on your local computer, not on a remote server. Hence, if you experience problems running HaplowebMaker on a large dataset, running your analysis on a more powerful computer should solve the problem.
+  
+### Q16: Are my data safe?
+As mentioned above, HaplowebMaker runs on your local computer so none of your data is transmitted to a server.
+  
+### Q17: How can I install HaplowebMaker locally so that I do not need an internet connection to load it?
+You can download the most recent HaplowebMaker release (or git clone the content of the GitHub repository) to your local computer and use it locally. For more details, see the README.md of https://github.com/eeg-ebe/HaplowebMaker.
+ 
+
