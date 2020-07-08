@@ -5307,7 +5307,7 @@ draw_NodePos.prototype = {
 			sepOut = true;
 		}
 		result += "</td></tr>";
-		result += "<tr><td colspan='2'>Sequences of heterozygous individuals are shown in blue (" + blueColored + " blue colored sequence name(s), " + difInd + " individual(s) thereof " + difInd2 + " heterozygous individuals)</td></tr>";
+		result += "<tr><td colspan='2' style='font-size: small'>Sequences of heterozygous individuals are shown in blue.</td></tr>";
 		result += "</table>";
 		return result;
 	}

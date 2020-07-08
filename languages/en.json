@@ -94,7 +94,7 @@
     "nrSequencesInFile.title" : "The number of sequences in this file",
     "nrDifSequencesInFile.label" : "No. of different sequences",
     "nrDifSequencesInFile.title" : "The number of different sequences in this file",
-    "seqLen.label" : "Sequence length",
+    "seqLen.label" : "Alignment length",
     "seqLen.title" : "The length of each sequence in the alignment",
     "intPos.label" : "No. of diff. positions",
     "intPos.title" : "The number of positions in the alignment where at least two sequences differ",

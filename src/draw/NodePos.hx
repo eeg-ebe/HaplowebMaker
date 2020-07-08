@@ -337,7 +337,7 @@ if(colorName == null) {
             sepOut = true;
         }
         result += "</td></tr>";
-        result += "<tr><td colspan='2'>Sequences of heterozygous individuals are shown in blue (" + blueColored + " blue colored sequence name(s), " + difInd + " individual(s) thereof " + difInd2 + " heterozygous individual(s))</td></tr>";
+        result += "<tr><td colspan='2' style='font-size: small'>Sequences of heterozygous individuals are shown in blue.</td></tr>"; // (" + blueColored + " blue colored sequence name(s), " + difInd + " individual(s) thereof " + difInd2 + " heterozygous individual(s))</td></tr>";
 //        result += "<tr><td>xPos</td><td>" + this.xPos + "</td></tr>";
 //        result += "<tr><td>yPos</td><td>" + this.yPos + "</td></tr>";
 //        result += "<tr><td>radius</td><td>" + this.radius + "</td></tr>";
