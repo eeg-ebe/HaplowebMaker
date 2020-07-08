@@ -18,5 +18,8 @@ Bandelt, Forster & Röhl (1999) Median-joining networks for inferring intraspeci
 
 Flot, Couloux & Tillier (2010) "Haplowebs as a graphical tool for delimiting species: a revival of Doyle's" field for recombination" approach and its application to the coral genus Pocillopora in Clipperton." BMC Evolutionary Biology 10:372
 
+# For more information
+Please refer to the [HaplowebMaker FAQ page](https://eeg-ebe.github.io/HaplowebMaker/faq.html)
+
 
 
