@@ -90,6 +90,12 @@ function calculateFaFile(project, i) {
         if(!!project["removeSingletons"]) {
             fc = FilterSingletons.filterSingletons(fc);
         }
+        // warning?
+        var result = FilterSingletons.checkMaybeMissing(fc, project["delimiter"]);
+        if (result) {
+            project["notifications"].push({ "ui" : "highlight", "icon" : "info", "text" : project["faFiles"][i]["filename"] + ": file contains only one sequence given for the following individual(s): " + result });
+            self.postMessage([{ "key" : ["notifications"], "val" : project["notifications"] }]);
+        }
         // change frequency?
         if(project["frequency"] == "assumeAtLeastDiploid") {
             fc = FilterSingletons.assumeAtLeastDiploid(fc, project["delimiter"]);

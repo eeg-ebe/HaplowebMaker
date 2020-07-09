@@ -12,6 +12,27 @@ class FilterSingletons {
         }
         return result;
     }
+    public static inline function checkMaybeMissing(faFile:List<Pair<String, String>>, delimiter:String):String {
+        var map:StringMap<Int> = new StringMap<Int>();
+        for (seq in faFile) {
+            var header:String = seq.first;
+            var indName:String = getIndIdentifier(seq.first, delimiter);
+            if (map.exists(indName)) {
+                var count:Int = map.get(indName);
+                ++count;
+                map.set(indName, count);
+            } else {
+                map.set(indName, 1);
+            }
+        }
+        var result:List<String> = new List<String>();
+        for (key in map.keys()) {
+            if (map.get(key) <= 1) {
+                result.add(key);
+            }
+        }
+        return result.join(", ");
+    }
     public static inline function assumeAtLeastDiploid(faFile:List<Pair<String, String>>, delimiter:String):List<Pair<String, String>> {
         var map:StringMap<List<Pair<String, String>>> = new StringMap<List<Pair<String, String>>>();
         for(seq in faFile) {
