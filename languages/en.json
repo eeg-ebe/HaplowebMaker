@@ -143,6 +143,6 @@
     "removeSingletons.label" : "Remove singletons",
     "removeSingletons.title" : "When this box is ticked, haplotypes found only once are removed from the analysis.",
     "networkCreationAlgo.title" : "Network algorithm",
-    "networkCreationAlgo.label" : "Network algorithm"
+    "networkCreationAlgo.label" : "Network algorithm" 
   }
 }
