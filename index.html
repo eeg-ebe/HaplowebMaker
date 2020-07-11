@@ -732,14 +732,15 @@ try {
                                 }],
                                 open: function(event, ui) {
                                     $(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
-                                }
+                                },
+                                position: ['center',20]
                             });
                             $( '#' + nodeId ).dialog('option', 'title', "INFO"); // TODO languageDicts[language]["dict"]["cite.label"]
                             $( '#' + nodeId ).dialog("open");
                             // hack in order to bring this dialog to the front
                             setTimeout( function() {
                                 $( '#' + nodeId ).dialog('moveToTop');
-                                $( '#' + nodeId ).dialog("widget").position({ of : $("#editSVGDialog"), collision : "none" });;
+                                //$( '#' + nodeId ).dialog("widget").position({ of : $("#editSVGDialog"), collision : "none" });;
                             }, 120);
                         }, 100);
                     }
