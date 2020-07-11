@@ -49,7 +49,7 @@ For each FASTA inputted in HaplowebMaker, the program returns a series of statis
 ### Q10: How should I structure my input FASTA files?
 The FASTA alignment file needs to list every sequence in your dataset. Furthermore the description/header/names of each sequence needs to follow certain rules, so that HaplowebMaker knows which sequences co-occur in which individual. More precisely, the header of each sequence should follow the pattern XXX[delimiter]YY, where XXX represents the name of each individual and YY is one or several numbers, letters or any other symbols of your choice. By default, [delimiter] is the underscore character "_" but a different delimiter can be selected.
 
-Example:
+The recommended way to specify the sequences of heterozygous individuals is to append simply "_a" and "_b", or "_1" and "_2" after the name of this individual:
 ````
 >Anton_a
 ACTGTCA---ACTGATGC
@@ -61,12 +61,36 @@ ACTA----CTGAACTATG
 ACTA---ACTGAACTATG
 ````
 
-(Here, HaplowebMaker knows that the two sequences ACTGTCA---ACTGATGC and TAACGT----ACTGATGC co-occur in the same individual named "Anton" as both sequences share the same substring before the _ delimiter.)
-
+Here, HaplowebMaker knows that the two sequences ACTGTCA---ACTGATGC and TAACGT----ACTGATGC co-occur in the same individual named "Anton" as both sequences share the same substring before the _ delimiter.
+  
+It is also possible to specify the sequences of heterozygous individuals simply by using the name of this individual several times in the FASTA file:
+````
+>Anton
+ACTGTCA---ACTGATGC
+>Anton
+TAACGT----ACTGATGC
+>Berta
+ACTA----CTGAACTATG
+>Berta
+ACTA---ACTGAACTATG
+````
+However, this is not recommended as it makes it more difficult to detect errors. Besides, many tools using FASTA are not happy with files that contain several sequences with the same header.
+  
+Yet another way to specify heterozygous individuals is to use the individual's name for the first allele then add a delimiter and an allele name for the other allele(s) for that individual:
+ ````
+>Anton
+ACTGTCA---ACTGATGC
+>Anton_a
+TAACGT----ACTGATGC
+>Berta
+ACTA----CTGAACTATG
+>Berta_a
+ACTA---ACTGAACTATG
+```` 
+This is also not recommended as it makes it more difficult to spot errors, and will trigger a series of warnings when running HaplowebMaker (but the analysis will run fine despite these warnings).
 
 ### Q11: How should I specify homozygous individuals?
 As longs as  the name itself does not contain any delimiter characters (by default, "_"), homozygous individual can be specified in three different ways: 
-
 ````
 >Charlie
 ACTG
@@ -84,9 +108,9 @@ ACTG
 ACTG
 ````
 
-The last representation can be used in order to highlight that although the individual is homozyogus, it is till a diploid individual.
+The first and last ways are recommended and will not trigger a warning, but the second one is dangerous as having a single sequence with a delimiter for a given individual may indicate that another sequence exists but was not detected due to a typo (hence, HaplowebMaker issues a warning for each sequence that includes a delimiter but for which no partner is detected).
 
-If however the name of the individual contains a delimiter character then one should make sure to specify an allele name:
+If the name of the individual contains a delimiter character then one should make sure to specify an allele name:
 ````
 >Charlie_Brown_a
 ACTG
