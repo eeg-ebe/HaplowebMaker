@@ -733,7 +733,9 @@ try {
                                 open: function(event, ui) {
                                     $(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
                                 },
-                                position: ['center',20]
+                                position: {
+                                    of : $("#n" + obj.node.id)
+                                }
                             });
                             $( '#' + nodeId ).dialog('option', 'title', "INFO"); // TODO languageDicts[language]["dict"]["cite.label"]
                             $( '#' + nodeId ).dialog("open");
