@@ -13,22 +13,28 @@ class FilterSingletons {
         return result;
     }
     public static inline function checkMaybeMissing(faFile:List<Pair<String, String>>, delimiter:String):String {
-        var map:StringMap<Int> = new StringMap<Int>();
+        // if one seuqnece contains a delimiter it should have a partner
+        // or we will warn about it ;)
+        var countingMap:StringMap<Int> = new StringMap<Int>();
+        var indNameToSeq:StringMap<String> = new StringMap<String>();
         for (seq in faFile) {
             var header:String = seq.first;
-            var indName:String = getIndIdentifier(seq.first, delimiter);
-            if (map.exists(indName)) {
-                var count:Int = map.get(indName);
-                ++count;
-                map.set(indName, count);
-            } else {
-                map.set(indName, 1);
+            var indName:String = getIndIdentifier(header, delimiter);
+            if (indName != header) { // delimiter inside and sequence needs partner
+                indNameToSeq.set(indName, header);
+                if (countingMap.exists(indName)) {
+                    var count:Int = countingMap.get(indName);
+                    ++count;
+                    countingMap.set(indName, count);
+                } else {
+                    countingMap.set(indName, 1);
+                }
             }
         }
         var result:List<String> = new List<String>();
-        for (key in map.keys()) {
-            if (map.get(key) <= 1) {
-                result.add(key);
+        for (key in countingMap.keys()) {
+            if (countingMap.get(key) <= 1) {
+                result.add(indNameToSeq.get(key));
             }
         }
         return result.join(", ");
