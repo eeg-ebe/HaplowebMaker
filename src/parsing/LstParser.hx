@@ -46,6 +46,16 @@ class LstParser {
                 }
             }
             return true;
+        } else if (StringTools.startsWith(s, "HSL(") && StringTools.endsWith(s, "%)")) {
+            var arr:Array<String> = s.split(",");
+            if (arr.length != 3) {
+                return false;
+            }
+            var middle:String = arr[1];
+            if (!StringTools.endsWith(middle, "%")) {
+                return false;
+            }
+            return true;
         } else {
             if (s == "ALICEBLUE") { return true; }
             if (s == "ANTIQUEWHITE") { return true; }
